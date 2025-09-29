@@ -151,6 +151,15 @@
     }
     /* quando ativo, estrela dourada */
     .fav-only-btn[aria-pressed="true"] i{ color:#f5c518; }
+    .dev-xp-btn{
+      margin-left:8px;
+      padding:6px 10px;
+      font-size:12px;
+      line-height:1.2;
+      font-weight:700;
+      white-space:nowrap;
+    }
+    .dev-xp-btn:focus-visible{ outline:3px solid var(--focus-ring); }
     .user-greeting{ font-size:14px; white-space:nowrap; }
     .level-progress{ display:flex; align-items:center; gap:8px; }
     .progress-info{ font-size:14px; font-weight:600; }
@@ -346,6 +355,9 @@
                   aria-pressed="false" title="Mostrar apenas favoritos">
             <i class="fa-regular fa-star" aria-hidden="true"></i>
             <span class="sr-only">Apenas favoritos</span>
+          </button>
+          <button id="devXpBtn" class="xp-button dev-xp-btn hit-target" type="button" title="Adicionar 10 XP">
+            XP +10 DEV
           </button>
         </search>
       </div>
@@ -688,6 +700,7 @@
   const progressText = document.getElementById('progressText');
   const userGreeting = document.getElementById('userGreeting');
   const xpBtn        = document.getElementById('xpBtn');
+  const devXpBtn     = document.getElementById('devXpBtn');
   const themeToggle  = document.getElementById('themeToggle');
   const resetBtn     = document.getElementById('resetProgressBtn');
   const levelUpDialog= document.getElementById('levelUpDialog');
@@ -832,14 +845,30 @@
     levelUpDialog.close?.(); levelUpDialog.removeAttribute('open'); freezeApp(false);
   }
 
-  xpBtn?.addEventListener('click', async ()=>{
-    xp += 10; const needed = xpNeededForLevel(level);
-    if(xp >= needed){
-      xp -= needed; level += 1; newLevelValue.textContent = String(level); openLevelDialog();
+  function applyXpGain(amount){
+    if(!Number.isFinite(amount) || amount <= 0) return;
+    xp += amount;
+    let leveledUp = false;
+    let needed = xpNeededForLevel(level);
+    while(xp >= needed){
+      xp -= needed;
+      level += 1;
+      leveledUp = true;
+      needed = xpNeededForLevel(level);
+    }
+    saveProgress(level, xp);
+    updateProgressUI(level, xp);
+    if(leveledUp){
+      newLevelValue.textContent = String(level);
+      openLevelDialog();
       announce(`Parabéns! Você alcançou o nível ${level}.`);
-    }else{ announce('Você ganhou 10 XP.'); }
-    saveProgress(level, xp); updateProgressUI(level, xp);
-  });
+    }else{
+      announce(`Você ganhou ${amount} XP.`);
+    }
+  }
+
+  xpBtn?.addEventListener('click', ()=> applyXpGain(10));
+  devXpBtn?.addEventListener('click', ()=> applyXpGain(10));
   closeModalBtn?.addEventListener('click', closeLevelDialog);
 
   /* Sidebar / ESC */
