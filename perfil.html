@@ -59,6 +59,7 @@
       --shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
       --shadow-dark: 0 10px 28px rgba(0, 0, 0, 0.35);
       --tap: 24px;
+      --banner-gradient: linear-gradient(135deg, rgba(15, 76, 129, 0.82), rgba(139, 92, 246, 0.78));
     }
     *{ box-sizing: border-box; }
     body{
@@ -115,11 +116,26 @@
     .profile-hero{
       padding:0;
       overflow:hidden;
+      position:relative;
     }
     .banner{
       position:relative;
-      background: linear-gradient(135deg, rgba(15,76,129,0.85), rgba(139,92,246,0.85));
       height:160px;
+      background-image: var(--banner-gradient), var(--banner-photo, none);
+      background-size: cover, cover;
+      background-position: center, center;
+      background-repeat: no-repeat, no-repeat;
+      isolation:isolate;
+    }
+    .banner::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(180deg, rgba(8, 27, 38, 0.35), rgba(8, 27, 38, 0.55));
+      pointer-events:none;
+      mix-blend-mode: multiply;
+      opacity:0;
+      transition: opacity .24s ease;
     }
     .banner::after{
       content:"";
@@ -128,6 +144,12 @@
       background-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" fill="none"%3E%3Cpath d="M0 160L80 80L160 200" stroke="rgba(255,255,255,0.15)" stroke-width="16"/%3E%3C/svg%3E');
       opacity:.6;
       pointer-events:none;
+    }
+    .banner[data-has-image="true"]::before{
+      opacity:1;
+    }
+    .banner[data-has-image="true"]::after{
+      opacity:.35;
     }
     .banner-btn{
       position:absolute;
@@ -149,6 +171,8 @@
       gap:18px;
       padding:0 24px 24px;
       margin-top:-52px;
+      position:relative;
+      z-index:1;
     }
     .avatar{
       width:108px;
@@ -337,6 +361,7 @@
     <div class="wrap">
       <section class="card profile-hero" aria-labelledby="profileTitle">
         <div class="banner" role="img" aria-label="Banner personalizado do perfil">
+          <input id="bannerFileInput" type="file" accept="image/*" hidden aria-hidden="true">
           <button id="bannerEditBtn" class="btn banner-btn" type="button">Editar banner</button>
         </div>
         <div class="profile-core">
@@ -497,6 +522,7 @@
   (() => {
     const K_NAME   = 'lmup_name';
     const K_AVATAR = 'lmup_avatar_v1';
+    const K_BANNER = 'lmup_banner_url';
     const K_THEME  = 'lmup_theme';
     const K_LEVEL  = 'lmup_level';
     const K_XP     = 'lmup_xp';
@@ -612,6 +638,22 @@
       document.body.classList.toggle('dark-mode', shouldDark);
       updateThemeMeta();
       updateThemeToggleUI();
+    };
+
+    const renderBanner = () => {
+      const banner = $('.banner');
+      if (!banner) return;
+      const stored = (safeGet(K_BANNER, '') || '').trim();
+      if (stored) {
+        const sanitized = stored.replace(/"/g, '%22');
+        banner.style.setProperty('--banner-photo', `url("${sanitized}")`);
+        banner.dataset.hasImage = 'true';
+        banner.setAttribute('aria-label', 'Banner personalizado do perfil com imagem enviada.');
+      } else {
+        banner.style.removeProperty('--banner-photo');
+        banner.removeAttribute('data-has-image');
+        banner.setAttribute('aria-label', 'Banner padrão do perfil.');
+      }
     };
 
     const renderProfile = () => {
@@ -815,6 +857,7 @@
 
     const refreshAll = () => {
       applyThemePreference();
+      renderBanner();
       renderProfile();
       renderStats();
       renderActivity();
@@ -881,12 +924,61 @@
         themeBtn.__lmu_bound = true;
       }
 
+      const bannerInput = $('#bannerFileInput');
       const bannerBtn = $('#bannerEditBtn');
       if (bannerBtn && !bannerBtn.__lmu_bound) {
         bannerBtn.addEventListener('click', () => {
-          announce('Personalização de banner chegará em breve.');
+          if (bannerInput) {
+            bannerInput.click();
+          } else {
+            announce('Não foi possível abrir o seletor de arquivos.');
+          }
         });
         bannerBtn.__lmu_bound = true;
+      }
+
+      if (bannerInput && !bannerInput.__lmu_bound) {
+        bannerInput.addEventListener('change', () => {
+          const [file] = bannerInput.files || [];
+          if (!file) return;
+          if (file.type && !file.type.startsWith('image/')) {
+            announce('Selecione uma imagem válida para o banner.');
+            bannerInput.value = '';
+            return;
+          }
+
+          if (typeof FileReader === 'undefined') {
+            announce('Seu navegador não suporta upload de banner.');
+            bannerInput.value = '';
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.addEventListener('load', () => {
+            const { result } = reader;
+            if (typeof result === 'string' && result.startsWith('data:')) {
+              safeSet(K_BANNER, result);
+              renderBanner();
+              announce('Banner atualizado com sucesso.');
+            } else {
+              announce('Não foi possível atualizar o banner.');
+            }
+            bannerInput.value = '';
+          });
+          reader.addEventListener('error', () => {
+            announce('Não foi possível ler o arquivo selecionado.');
+            bannerInput.value = '';
+          });
+
+          try {
+            reader.readAsDataURL(file);
+          } catch (err) {
+            console.error(err);
+            announce('Não foi possível processar o arquivo de banner.');
+            bannerInput.value = '';
+          }
+        });
+        bannerInput.__lmu_bound = true;
       }
     };
 
@@ -894,6 +986,9 @@
       if (!event) return;
       if (event.key === K_NAME || event.key === K_AVATAR) {
         renderProfile();
+      }
+      if (event.key === K_BANNER) {
+        renderBanner();
       }
       if (event.key === K_LEVEL || event.key === K_XP || event.key === K_EVENTS) {
         renderStats();
