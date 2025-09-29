@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="pt-BR" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Progresso — Level Me Up!</title>
+  <meta name="description" content="Acompanhe nível, XP por dia, matérias em andamento e histórico." />
+
+  <!-- Favicon neutro para evitar 404 -->
+  <link rel="icon" href="data:,">
+  <link rel="shortcut icon" href="data:,">
+
+  <!-- Theme color -->
+  <meta name="theme-color" content="#0b3042" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b2533" media="(prefers-color-scheme: dark)">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- CSP (nonce precisa bater com o do <script>) -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 script-src 'self' 'nonce-lmup-2025';
+                 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
+                 img-src 'self' data:;
+                 font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+                 connect-src 'self';
+                 object-src 'none';
+                 base-uri 'none';
+                 worker-src 'self'">
+
+  <!-- Fonts & Ícones (degradam bem se bloqueados) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer" />
+
+  <!-- Estilos -->
+  <style>
+    :root{
+      color-scheme: light dark;
+      --topbar: #0b3042;
+      --topbar-dark: #0b2533;
+      --text: #222;
+      --text-dark: #f5f5f5;
+      --bg: #f7f8fa;
+      --bg-dark: #161616;
+      --card: #fff;
+      --card-dark: #1f1f1f;
+      --border: #e5e7eb;
+      --border-dark: #2c2c2c;
+      --accent: #8b5cf6;
+      --secondary: #f6c453;
+      --soft: #f3f4f6;
+      --focus: #8b5cf6;
+      --radius: 10px;
+      --tap: 24px;
+      --shadow: 0 4px 18px rgba(0,0,0,.08);
+
+      /* === Alias para manter tokens compatíveis com o index === */
+      --color-accent: var(--accent);
+      --color-gold: var(--secondary);
+    }
+    *{ box-sizing: border-box; }
+    body{
+      margin:0; font-family:'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg); color: var(--text);
+    }
+    .sr-only{ position:absolute!important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    :where(a,button,input,select,textarea,[tabindex]):focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+    :where(button,a){ min-width:var(--tap); min-height:var(--tap); cursor:pointer; }
+    @media (prefers-reduced-motion: reduce){ *{ animation:none!important; transition:none!important; } }
+
+    /* Header de progresso (sticky) */
+    .progress-header{
+      position: sticky; top:0; z-index:10; background:var(--topbar); color:#fff;
+      padding:10px 16px; display:flex; align-items:center; gap:12px; box-shadow: var(--shadow);
+    }
+    .ph-left{ display:flex; align-items:center; gap:10px; min-width: 0; }
+    .ph-right{ margin-left:auto; display:flex; align-items:center; gap:8px; }
+    .xp-bar{ width:180px; height:10px; background:rgba(255,255,255,.25); border-radius:6px; overflow:hidden; }
+    .xp-fill{ height:100%; width:0%; background:var(--secondary); transition: width 220ms ease; }
+    .btn-primary{ background:var(--secondary); color:#111; border:0; padding:6px 12px; border-radius:8px; font-weight:700; }
+
+    /* Layout duas colunas */
+    .wrap{ max-width:1200px; margin:16px auto; padding:0 16px; }
+    .grid{ display:grid; grid-template-columns: 2fr 1fr; gap:20px; }
+    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
+
+    /* Cards, seções */
+    .card{
+      background:var(--card); border:1px solid var(--border); border-radius: var(--radius); padding:16px;
+      box-shadow: var(--shadow);
+    }
+    .card h3{ margin:0 0 12px; font-size:18px; }
+    .section{ margin-bottom:20px; }
+    .tag{ display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; border:1px solid var(--border); background:var(--soft); font-size:12px; }
+
+    /* Perfil (hero) */
+    .profile-hero{ display:flex; align-items:center; gap:16px; }
+    .avatar{
+      width:72px; height:72px; border-radius:50%; background:#ddd; display:grid; place-items:center; font-weight:800; font-size:26px;
+      border:3px solid #fff; box-shadow: var(--shadow); overflow:hidden;
+    }
+    .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .profile-info{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+    .profile-name{ font-size:20px; font-weight:800; margin-right:6px; }
+    .profile-actions{ margin-left:auto; display:flex; gap:8px; }
+    .btn{ border:1px solid var(--border); background:var(--soft); padding:6px 10px; border-radius:8px; }
+    .btn:focus-visible{ outline:3px solid var(--focus); }
+
+    /* Matérias em andamento */
+    .subjects-grid{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; }
+    .subject-tile{
+      border:1px solid var(--border); background:var(--card); border-radius:10px; padding:12px;
+      display:flex; flex-direction:column; gap:8px; transition: transform .16s ease, box-shadow .16s ease;
+    }
+    .subject-tile:hover{ transform: translateY(-2px); box-shadow: var(--shadow); }
+    .subject-title{ font-weight:700; }
+    .subject-meta{ font-size:12px; color:#4b5563; display:flex; gap:8px; flex-wrap:wrap; }
+    .bar{ width:100%; height:8px; background:var(--soft); border-radius:999px; overflow:hidden; }
+    .bar-fill{ height:100%; width:40%; background:var(--accent); }
+
+    @media (max-width: 980px){ .subjects-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media (max-width: 520px){ .subjects-grid{ grid-template-columns: 1fr; } }
+
+    /* Quests */
+    .quests{ display:grid; grid-template-columns: 1fr; gap:10px; }
+    .quest{ display:flex; align-items:center; justify-content:space-between; border:1px solid var(--border); border-radius:10px; padding:10px; background:var(--card); }
+    .quest-left{ display:flex; align-items:center; gap:8px; }
+    .quest .bar{ max-width:160px; }
+
+    /* Heatmap */
+    .heatmap{ line-height:0; }
+    .hm-cell{ display:inline-block; width:12px; height:12px; margin:2px; border-radius:2px; background:#e5e7eb; }
+    .hm-1{ background:#c7d2fe } .hm-2{ background:#93c5fd } .hm-3{ background:#60a5fa } .hm-4{ background:#3b82f6 }
+    .legend{ display:flex; align-items:center; gap:6px; font-size:12px; margin-top:8px; }
+    .legend .hm-cell{ margin:0 2px; }
+
+    /* Maestria */
+    .mastery-row{ display:flex; align-items:center; gap:10px; margin:6px 0; }
+    .mastery-row .bar{ height:10px; }
+
+    /* Tabela */
+    table{ width:100%; border-collapse: collapse; }
+    th, td{ border:1px solid var(--border); padding:8px; text-align:left; }
+    th{ background:var(--soft); }
+
+    /* Dialog */
+    dialog[open]{ max-width:520px; border-radius:12px; padding:16px; }
+    dialog::backdrop{ background:rgba(0,0,0,.45); }
+    .form-row{ display:flex; gap:10px; margin:.5rem 0; }
+    .form-row label{ flex:1; display:flex; flex-direction:column; gap:6px; }
+    .input{ padding:.5rem .6rem; border:1px solid var(--border); border-radius:8px; }
+    .menu{ display:flex; gap:8px; justify-content:flex-end; margin-top:.5rem; }
+
+    /* Dark mode básico quando aberto direto (MPA) */
+    .dark-mode{ background:var(--bg-dark); color:var(--text-dark); }
+    .dark-mode .card, .dark-mode .subject-tile, .dark-mode .quest{ background:var(--card-dark); border-color:var(--border-dark); }
+
+    /* Link do logo no progresso */
+    .brand-link{
+      text-decoration:none; color:#fff; font-weight:800; font-size:18px;
+      white-space:nowrap; margin-right:12px;
+    }
+    .brand-link:focus-visible{
+      outline:2px solid #fff; outline-offset:3px; border-radius:6px;
+    }
+    /* Link do logo (não afeta ícones) */
+    header .brand-link,
+    .progress-header .brand-link {
+      text-decoration: none;
+      color: #fff;
+      font-weight: 800;
+      font-size: 18px;
+      white-space: nowrap;
+      margin-right: 12px;
+    }
+    header .brand-link:focus-visible,
+    .progress-header .brand-link:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+    header .brand-link:hover,
+    .progress-header .brand-link:hover {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* ==== Fixes de contraste no modo escuro ==== */
+
+    /* meta das matérias (debaixo do título) */
+    body.dark-mode .subject-meta { color: var(--text-dark); }
+
+    /* botões no dark: deixam de ser clarinhos */
+    body.dark-mode .btn{
+      background:#262626;
+      border-color: var(--border-dark);
+      color: var(--text-dark);
+    }
+    body.dark-mode .btn:hover{ filter:brightness(1.05); }
+
+    /* botão amarelo continua com texto escuro p/ contraste */
+    body.dark-mode .btn-primary{
+      background: var(--secondary);
+      color:#111;
+    }
+
+    /* topbar do progresso no dark */
+    body.dark-mode .progress-header{
+      background: var(--topbar-dark);
+      color:#fff;
+    }
+
+    /* Texto padrão dentro de áreas escuras */
+    body.dark-mode,
+    body.dark-mode .main,
+    body.dark-mode .sidebar {
+      color: var(--text-dark);
+    }
+
+    /* Links no dark */
+    body.dark-mode a { color: var(--text-dark); }
+    body.dark-mode a:hover { color: var(--accent); }
+
+    /* Cards/painéis genéricos */
+    body.dark-mode .card,
+    body.dark-mode [class*="card"],
+    body.dark-mode .panel,
+    body.dark-mode .box,
+    body.dark-mode .widget {
+      background: var(--card-dark);
+      color: var(--text-dark);
+      border-color: var(--border-dark);
+    }
+
+    /* Pílulas / badges / tags (os “Recente”, “Foco”, etc) */
+    body.dark-mode .chip,
+    body.dark-mode .pill,
+    body.dark-mode .tag,
+    body.dark-mode .badge,
+    body.dark-mode [class*="pill"],
+    body.dark-mode [class*="badge"],
+    body.dark-mode [class*="chip"],
+    body.dark-mode [class*="tag"]{
+      background: hsl(0 0% 22%);
+      color: var(--text-dark);
+      border: 1px solid var(--border-dark);
+    }
+    /* Tabelas (Histórico) */
+    body.dark-mode table { color: var(--text-dark); }
+    body.dark-mode th {
+      background: var(--card-dark);
+      color: var(--text-dark);
+      border-bottom: 1px solid var(--border-dark);
+    }
+    body.dark-mode td { border-top: 1px solid var(--border-dark); }
+
+    /* Legendas/pequenos textos dentro de widgets escuros */
+    body.dark-mode .legend,
+    body.dark-mode .legend small,
+    body.dark-mode small {
+      color: var(--text-dark);
+    }
+
+    /* Força correção quando algum elemento veio com color:#111/#000 inline */
+    body.dark-mode [style*="color:#111"],
+    body.dark-mode [style*="color: #111"],
+    body.dark-mode [style*="color:#000"],
+    body.dark-mode [style*="color: #000"],
+    body.dark-mode .text-dark {
+      color: var(--text-dark) !important;
+    }
+
+    /* Botões de fundo claro DEVEM continuar com texto escuro p/ contraste */
+    body.dark-mode .xp-button,
+    body.dark-mode .reset-btn {
+      color: #111;
+    }
+
+    /* Wrapper do histórico com fallback + otimização progressiva */
+    .table-wrap { /* fallback vazio */ }
+    @supports (content-visibility: auto) {
+      .table-wrap {
+        content-visibility: auto;
+        contain-intrinsic-size: 400px 600px;
+      }
+    }
+
+    /* 1) Bordas brancas: Editar avatar, Editar nome e Desfazer último */
+    .profile-actions .btn,
+    #undoLastBtn{
+      border: 2px solid #fff !important;
+      border-radius: var(--radius);
+    }
+
+    /* 2) Barrinhas das matérias em andamento:
+          azul no claro, dourado no dark */
+    .subject-tile .bar-fill{            /* modo claro */
+      background: #3b82f6;              /* azul */
+    }
+    body.dark-mode .subject-tile .bar-fill{ /* modo escuro */
+      background: var(--secondary);     /* dourado (#f6c453) */
+    }
+
+    /* Alinhar as barrinhas das matérias entre si */
+    .subject-tile {              /* já é flex column; vamos garantir que a barra fique no fundo */
+      display: flex;
+      flex-direction: column;
+    }
+    .subject-title{              /* reserva espaço para até 2 linhas */
+      line-height: 1.25;
+      min-height: 2.6em;         /* ~2 linhas */
+      display: -webkit-box;
+      -webkit-line-clamp: 2;     /* corta em 2 linhas */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .subject-meta{               /* altura fixa para os chips */
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .subject-tile .bar{          /* a barra vai sempre “colar” no fundo do card */
+      margin-top: auto;
+      height: 8px;
+    }
+    .subject-tile .bar-fill{
+      height: 100%;
+      display: block;
+    }
+
+    /* ===== Modal "Subiu de nível!" no modo escuro ===== */
+    body.dark-mode dialog[open]{
+      background: #000;                       /* fundo preto */
+      border: 2px solid var(--secondary);     /* dourado */
+      color: var(--secondary);                /* texto dourado */
+    }
+    /* garante título e parágrafos em dourado */
+    body.dark-mode dialog[open] h1,
+    body.dark-mode dialog[open] h2,
+    body.dark-mode dialog[open] h3,
+    body.dark-mode dialog[open] p,
+    body.dark-mode dialog[open] strong,
+    body.dark-mode dialog[open] span{
+      color: var(--secondary);
+    }
+    /* botão de fechar continua legível */
+    body.dark-mode dialog[open] .btn-primary{
+      background: var(--secondary);
+      color: #111;
+    }
+    /* deixa o troféu dourado (se for ícone ou SVG) */
+    body.dark-mode dialog[open] .fa,
+    body.dark-mode dialog[open] svg{
+      color: var(--secondary) !important;
+    }
+    body.dark-mode dialog[open] svg path{
+      fill: var(--secondary) !important;
+      stroke: var(--secondary) !important;
+    }
+
+    /* === Unificação extra p/ compatibilidade com o index ===
+       - no dark mode o "accent" vira dourado
+       - e garantimos o troféu dourado mesmo com cor inline */
+    body.dark-mode{
+      --accent: var(--secondary);
+      --color-accent: var(--color-gold);
+    }
+    body.dark-mode #levelUpDialog .trophy,
+    body.dark-mode #levelUpDialog .trophy i,
+    body.dark-mode #levelUpDialog i.fa-trophy{
+      color: var(--color-gold) !important;
+      --fa-primary-color: var(--color-gold) !important;
+      --fa-secondary-color: var(--color-gold) !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Se abrir direto (MPA), redireciona a home e volta com o mini-router -->
+  <script nonce="lmup-2025">
+    if (!window.__LMU_PARTIAL__) {
+      sessionStorage.setItem('lmu_goto','progresso.html');
+      location.href = 'index.html';
+    }
+  </script>
+
+  <a class="sr-only" href="#mainContent">Ir para o conteúdo</a>
+
+  <!-- HEADER PROGRESSO (em MPA aparece; no SPA a topbar da home permanece) -->
+  <header class="progress-header" role="banner">
+    <a href="index.html" class="brand-link" aria-label="Voltar para a página inicial">Level Me Up!</a>
+    <div class="ph-left" aria-label="Progresso geral">
+      <strong id="phLevel">Nível 1</strong>
+      <div class="xp-bar" aria-hidden="true"><div class="xp-fill" id="phXpFill" style="width:0%"></div></div>
+      <span id="phNeed">Faltam 100 XP</span>
+    </div>
+    <div class="ph-right">
+      <button class="btn-primary" id="pgAddXPBtn" type="button" aria-describedby="pgAddHelp"><i class="fa-solid fa-plus" aria-hidden="true"></i> Adicionar XP</button>
+      <span id="pgAddHelp" class="sr-only">Abre um diálogo para registrar XP</span>
+    </div>
+  </header>
+
+  <main id="mainContent" class="wrap" role="main" tabindex="-1">
+    <!-- HERO PERFIL -->
+    <section class="card section" aria-labelledby="perfil-h">
+      <div class="profile-hero">
+        <div class="avatar" id="avatarBox" aria-label="Avatar do usuário"><span id="avatarInitial">?</span></div>
+        <div class="profile-info">
+          <div class="profile-name"><span id="profileName">Visitante</span></div>
+          <span class="tag" id="quickStats"><i class="fa-regular fa-star" aria-hidden="true"></i> <span id="statLevel">Nível 1</span></span>
+        </div>
+        <div class="profile-actions">
+          <label class="btn" for="avatarInput" role="button" tabindex="0"><i class="fa-regular fa-image" aria-hidden="true"></i> Editar avatar</label>
+          <input id="avatarInput" type="file" accept="image/*" hidden>
+          <button class="btn" id="editNameBtn" type="button" aria-haspopup="dialog"><i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>Editar nome</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <!-- COLUNA ESQUERDA -->
+      <div>
+        <!-- Matérias em andamento -->
+        <section class="card section" aria-labelledby="subjects-h">
+          <h3 id="subjects-h">Matérias em andamento</h3>
+          <div id="subjectsGrid" class="subjects-grid" aria-live="polite"></div>
+        </section>
+
+        <!-- Consistência -->
+        <section class="card section" aria-labelledby="heatmap-h">
+          <h3 id="heatmap-h">Consistência</h3>
+          <div id="heatmap" class="heatmap" role="img" aria-labelledby="heatmap-h heatmap-desc"></div>
+          <p id="heatmap-desc" class="sr-only">Mapa de calor dos últimos 84 dias. Cada quadradinho representa a soma de XP por dia.</p>
+          <div class="legend" aria-hidden="true">Menos
+            <span class="hm-cell"></span><span class="hm-cell hm-1"></span><span class="hm-cell hm-2"></span><span class="hm-cell hm-3"></span><span class="hm-cell hm-4"></span> Mais
+          </div>
+          <div class="sr-only">
+            <table aria-label="Tabela alternativa do heatmap">
+              <thead><tr><th>Data</th><th>XP</th></tr></thead>
+              <tbody id="hmTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Histórico -->
+        <section class="card section" aria-labelledby="history-h">
+          <h3 id="history-h">Histórico</h3>
+          <form role="search" aria-label="Filtrar histórico" style="margin-bottom:8px">
+            <label for="histFilter" class="sr-only">Filtro</label>
+            <input id="histFilter" class="input" type="search" placeholder="Filtrar por área ou nota…">
+          </form>
+          <div class="table-wrap">
+            <table>
+              <caption class="sr-only">Eventos de XP</caption>
+              <thead><tr><th>Data</th><th>Área</th><th>XP</th><th>Nota</th></tr></thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+            <button class="btn" id="undoLastBtn" type="button" title="Desfazer último lançamento">Desfazer último</button>
+          </div>
+        </section>
+      </div>
+
+      <!-- COLUNA DIREITA -->
+      <aside>
+        <!-- Quests -->
+        <section class="section card" aria-labelledby="quests-h">
+          <h3 id="quests-h">Quests do dia/semana</h3>
+          <div class="quests" id="questsList">
+            <!-- preenchido via JS -->
+          </div>
+        </section>
+
+        <!-- Maestria -->
+        <section class="section card" aria-labelledby="mastery-h">
+          <h3 id="mastery-h">Maestria por área</h3>
+          <div id="masteryList" class="mastery"></div>
+          <div class="sr-only">
+            <table aria-label="Tabela de maestria por área">
+              <thead><tr><th>Área</th><th>XP (total)</th><th>%</th></tr></thead>
+              <tbody id="masteryTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Badges -->
+        <section class="section card" aria-labelledby="badges-h">
+          <h3 id="badges-h">Badges & marcos</h3>
+          <div aria-live="polite">
+            <span class="tag"><i class="fa-regular fa-circle-check" aria-hidden="true"></i> 1º lançamento</span>
+            <span class="tag"><i class="fa-regular fa-calendar-check" aria-hidden="true"></i> 3 dias seguidos</span>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Dialog: adicionar XP -->
+  <dialog id="pgDialog" aria-labelledby="pgTitle" aria-describedby="pgDesc">
+    <h3 id="pgTitle">Adicionar XP</h3>
+    <p id="pgDesc" class="sr-only">Preencha a área, a quantidade de XP e uma nota opcional.</p>
+    <form id="pgForm" method="dialog">
+      <div class="form-row">
+        <label>Área
+          <input id="pgArea" class="input" list="pgAreaList" placeholder="Ex.: Lógica, Comunicação…" autocomplete="off">
+          <datalist id="pgAreaList"></datalist>
+        </label>
+        <label>XP
+          <input id="pgDelta" class="input" type="number" inputmode="numeric" min="1" step="1" required>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Nota (opcional)
+          <input id="pgNote" class="input" maxlength="120" placeholder="O que você aprendeu?">
+        </label>
+      </div>
+      <menu class="menu">
+        <button class="btn-primary" type="submit">Adicionar</button>
+        <button class="btn" type="button" id="pgCancel">Cancelar</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <!-- Dialog: editar nome -->
+  <dialog id="nameDialog" aria-labelledby="nameTitle">
+    <h3 id="nameTitle">Editar nome</h3>
+    <form id="nameForm" method="dialog">
+      <label>Nome
+        <input id="nameInput" class="input" maxlength="40" placeholder="Seu nome">
+      </label>
+      <menu class="menu">
+        <button class="btn-primary" type="submit">Salvar</button>
+        <button class="btn" type="button" id="nameCancel">Cancelar</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <!-- aria-live local (MPA); no SPA a home já tem um -->
+  <div id="pageLive" class="sr-only" aria-live="polite"></div>
+
+  <!-- Script: funciona sozinho (MPA) e com o router (SPA) -->
+  <script nonce="lmup-2025" data-page-script>
+  (function(){
+    /* ==== CHAVES ==== */
+    const K_LEVEL  = 'lmup_level';
+    const K_XP     = 'lmup_xp';
+    const K_EVENTS = 'lmup_xp_events_v1';
+
+    const K_NAME   = 'lmup_name';
+    const K_AVATAR = 'lmup_avatar_v1';
+    const K_GOALS  = 'lmup_goals_v1';
+
+    /* ==== HELPERS ==== */
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const safeGet=(k,fb=null)=>{try{const v=localStorage.getItem(k);return v??fb;}catch{return fb;}};
+    const safeSet=(k,v)=>{try{localStorage.setItem(k,v);}catch{}};
+    const xpNeeded = lvl => Math.max(100, lvl*100);
+    function loadProgress(){
+      let level = parseInt(safeGet(K_LEVEL,'1'),10);
+      let xp = parseInt(safeGet(K_XP,'0'),10);
+      if(Number.isNaN(level)) level=1; if(Number.isNaN(xp)) xp=0;
+      return {level,xp};
+    }
+    function saveProgress(level,xp){ safeSet(K_LEVEL,String(level)); safeSet(K_XP,String(xp)); }
+    const announce = msg => { const el = document.getElementById('xpLive') || document.getElementById('pageLive'); if(el && msg) el.textContent = msg; };
+
+    /* ==== Estado leve ==== */
+    const loadEvents = ()=>{ try{ return JSON.parse(localStorage.getItem(K_EVENTS)||'[]'); }catch{ return []; } };
+    const saveEvents = (arr)=>{ try{ localStorage.setItem(K_EVENTS, JSON.stringify(arr)); }catch{} };
+
+    /* ==== UI PROGRESSO HEADER ==== */
+    function renderHeader(){
+      const st = loadProgress();
+      const phLevel = $('#phLevel');
+      const phNeed  = $('#phNeed');
+      const phFill  = $('#phXpFill');
+      if (phLevel) phLevel.textContent = `Nível ${st.level}`;
+      const need = xpNeeded(st.level);
+      if (phNeed) phNeed.textContent = `Faltam ${Math.max(0, need - st.xp)} XP`;
+      if (phFill) phFill.style.width = Math.min(100, (st.xp/need)*100) + '%';
+      const statLevel = $('#statLevel');
+      if (statLevel) statLevel.textContent = `Nível ${st.level}`;
+    }
+
+    /* ==== PERFIL ==== */
+    function renderProfile(){
+      const name = safeGet(K_NAME,'Visitante');
+      const profileName = $('#profileName'); if (profileName) profileName.textContent = name;
+      const first = name.trim()[0] ? name.trim()[0].toUpperCase() : '?';
+      const avatarInitial = $('#avatarInitial'); if (avatarInitial) avatarInitial.textContent = first;
+      const img = safeGet(K_AVATAR,null);
+      if(img){
+        const imgEl = document.createElement('img'); imgEl.src = img; imgEl.alt = name;
+        const box = $('#avatarBox'); if (box) { box.innerHTML=''; box.appendChild(imgEl); }
+      }
+    }
+    $('#avatarInput')?.addEventListener('change', async (e)=>{
+      const f = e.target.files?.[0]; if(!f) return;
+      const data = await f.arrayBuffer();
+      const blob = new Blob([data], {type: f.type || 'image/*'});
+      const reader = new FileReader();
+      reader.onload = () => { safeSet(K_AVATAR, reader.result); renderProfile(); announce('Avatar atualizado.'); };
+      reader.readAsDataURL(blob);
+    });
+    $('#editNameBtn')?.addEventListener('click', ()=>{
+      const dlg = $('#nameDialog'); if (!dlg) return;
+      const input = $('#nameInput'); if (input) input.value = safeGet(K_NAME,'Visitante');
+      dlg.showModal ? dlg.showModal() : dlg.setAttribute('open','');
+      input?.focus();
+    });
+    $('#nameCancel')?.addEventListener('click', ()=>{ const dlg=$('#nameDialog'); dlg?.close?.(); dlg?.removeAttribute('open'); });
+    $('#nameForm')?.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const input = $('#nameInput');
+      const v = (input?.value||'Visitante').trim()||'Visitante';
+      safeSet(K_NAME, v); renderProfile();
+      const dlg = $('#nameDialog'); dlg?.close?.(); dlg?.removeAttribute('open');
+      announce('Nome atualizado.');
+      window.dispatchEvent(new Event('lmu:name-changed'));
+      window.refreshNameOnTopbar?.();
+    });
+
+    /* ==== MATÉRIAS EM ANDAMENTO ==== */
+    function subjectsFromData(){
+      const evs = loadEvents();
+      const byArea = new Map();
+      const now = Date.now();
+      evs.forEach(ev=>{
+        const area = (ev.area||'Geral').trim();
+        const delta = Number(ev.delta||0);
+        const age = Math.min(1, Math.max(0, (now - Date.parse(ev.ts)) / (45*24*60*60*1000)));
+        const score = delta * (1.2 - age*0.4);
+        byArea.set(area, (byArea.get(area)||0) + score);
+      });
+      if(byArea.size===0 && Array.isArray(window.LMU_SUBAREAS)){
+        window.LMU_SUBAREAS.forEach(a=>byArea.set(a, 1));
+      }
+      return Array.from(byArea.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([area])=>area);
+    }
+    function renderSubjects(){
+      const grid = $('#subjectsGrid'); if (!grid) return;
+      grid.innerHTML='';
+      const areas = subjectsFromData();
+      if(areas.length===0){
+        grid.innerHTML = `<p>Nenhuma matéria ainda. Registre seu primeiro XP!</p>`;
+        return;
+      }
+      areas.forEach(area=>{
+        const tile = document.createElement('article');
+        tile.className = 'subject-tile';
+        tile.innerHTML = `
+          <div class="subject-title">${escapeHTML(area)}</div>
+          <div class="subject-meta">
+            <span class="tag"><i class="fa-regular fa-clock" aria-hidden="true"></i> Recente</span>
+            <span class="tag"><i class="fa-regular fa-star" aria-hidden="true"></i> Foco</span>
+          </div>
+          <div class="bar" aria-hidden="true"><div class="bar-fill" style="width:${30+Math.random()*50}%"></div></div>
+        `;
+        grid.appendChild(tile);
+      });
+    }
+
+    /* ==== QUESTS (mock leve) ==== */
+    function loadGoals(){
+      try{ return JSON.parse(localStorage.getItem(K_GOALS)||'{"daily":{"targetXP":50,"enabled":true},"weekly":{"targetXP":200,"enabled":true}}'); }catch{return {"daily":{"targetXP":50,"enabled":true},"weekly":{"targetXP":200,"enabled":true}};}
+    }
+    function renderQuests(){
+      const qs = $('#questsList'); if (!qs) return;
+      qs.innerHTML='';
+      loadGoals(); // mantido caso use depois
+      const q = [
+        {id:'q1', label:'2x Lógica', xp:30},
+        {id:'q2', label:'1x Comunicação', xp:20},
+        {id:'q3', label:'Revisão 15 min', xp:10}
+      ];
+      q.forEach(item=>{
+        const el = document.createElement('div'); el.className='quest';
+        el.innerHTML = `
+          <div class="quest-left"><input type="checkbox" id="${item.id}">
+            <label for="${item.id}">${escapeHTML(item.label)}</label></div>
+          <div class="bar" aria-hidden="true"><div class="bar-fill" style="width:${Math.random()*80}%"></div></div>
+          <button class="btn" data-xp="${item.xp}" aria-label="Marcar '${escapeHTML(item.label)}' como concluída">Concluir (+${item.xp} XP)</button>
+        `;
+        el.querySelector('button')?.addEventListener('click', ()=>{ addXP('Quests', item.xp, item.label); });
+        qs.appendChild(el);
+      });
+    }
+
+    /* ==== HEATMAP ==== */
+    function renderHeatmap(){
+      const container = $('#heatmap'); if (!container) return;
+      container.innerHTML='';
+      const tableBody = $('#hmTable'); if(tableBody) tableBody.innerHTML='';
+      const evs = loadEvents();
+      const byDay = new Map();
+      evs.forEach(ev=>{
+        const d = (new Date(ev.ts)).toISOString().slice(0,10);
+        byDay.set(d, (byDay.get(d)||0) + Number(ev.delta||0));
+      });
+      const today = new Date(); today.setHours(0,0,0,0);
+      const start = new Date(today); start.setDate(start.getDate()-83);
+      for(let i=0;i<84;i++){
+        const d = new Date(start); d.setDate(start.getDate()+i);
+        const key = d.toISOString().slice(0,10);
+        const val = byDay.get(key)||0;
+        const level = val>80?4:val>40?3:val>20?2:val>0?1:0;
+
+        const cell = document.createElement('button');
+        cell.type='button';
+        cell.className = 'hm-cell '+(level?('hm-'+level):'');
+        cell.title = `${key}: ${val} XP`;
+        cell.setAttribute('aria-label', `${key}: ${val} XP`);
+        cell.addEventListener('click', ()=> filterHistoryByDate(key));
+        container.appendChild(cell);
+        if((i+1)%7===0){ container.appendChild(document.createElement('br')); }
+
+        if(tableBody){
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${key}</td><td>${val}</td>`;
+          tableBody.appendChild(tr);
+        }
+      }
+    }
+
+    /* ==== MASTERY ==== */
+    function renderMastery(){
+      const evs = loadEvents();
+      const totalByArea = new Map();
+      evs.forEach(ev=>{
+        const a = (ev.area||'Geral').trim();
+        totalByArea.set(a, (totalByArea.get(a)||0) + Number(ev.delta||0));
+      });
+      const entries = Array.from(totalByArea.entries()).sort((a,b)=> b[1]-a[1]);
+      const total = entries.reduce((acc, [,v])=>acc+v, 0) || 1;
+      const list = $('#masteryList'); if (list) list.innerHTML='';
+      const table = $('#masteryTable'); if(table) table.innerHTML='';
+      entries.slice(0,8).forEach(([area, xp])=>{
+        const pct = Math.round((xp/total)*100);
+        const row = document.createElement('div'); row.className='mastery-row';
+        row.innerHTML = `<strong style="min-width:120px">${escapeHTML(area)}</strong>
+                         <div class="bar" style="flex:1"><div class="bar-fill" style="width:${Math.max(6,pct)}%"></div></div>
+                         <span class="tag">${xp} XP • ${pct}%</span>`;
+        list?.appendChild(row);
+        if(table){
+          const tr = document.createElement('tr'); tr.innerHTML = `<td>${escapeHTML(area)}</td><td>${xp}</td><td>${pct}%</td>`;
+          table.appendChild(tr);
+        }
+      });
+    }
+
+    /* ==== HISTÓRICO ==== */
+    function renderHistory(){
+      const body = $('#historyBody'); if (!body) return;
+      body.innerHTML='';
+      const evs = loadEvents().slice().reverse();
+      evs.forEach(ev=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${new Date(ev.ts).toLocaleString()}</td>
+                        <td>${escapeHTML(ev.area||'')}</td>
+                        <td>${ev.delta}</td>
+                        <td>${escapeHTML(ev.note||'')}</td>`;
+        body.appendChild(tr);
+      });
+    }
+    function filterHistoryByDate(isoDate){
+      const f = $('#histFilter'); if (f) { f.value = isoDate; applyHistoryFilter(); }
+      announce(`Filtrado por ${isoDate}.`);
+    }
+    function applyHistoryFilter(){
+      const q = ($('#histFilter')?.value||'').toLowerCase();
+      $$('#historyBody tr').forEach(tr=>{ tr.hidden = !tr.textContent.toLowerCase().includes(q); });
+    }
+    $('#histFilter')?.addEventListener('input', applyHistoryFilter);
+
+    /* ==== DESFAZER ==== */
+    $('#undoLastBtn')?.addEventListener('click', ()=>{
+      const evs = loadEvents();
+      if(!evs.length) return;
+      evs.pop(); saveEvents(evs); refreshAll(); announce('Último lançamento desfeito.');
+    });
+
+    /* ==== DIALOG ADICIONAR XP ==== */
+    const dlg = $('#pgDialog');
+    const openDlg = ()=>{ dlg?.showModal ? dlg.showModal() : dlg?.setAttribute('open',''); $('#pgDelta')?.focus(); };
+    const closeDlg = ()=>{ dlg?.close?.(); dlg?.removeAttribute('open'); $('#pgAddXPBtn')?.focus(); };
+    $('#pgAddXPBtn')?.addEventListener('click', openDlg);
+    $('#pgCancel')?.addEventListener('click', closeDlg);
+    $('#pgForm')?.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const area = ($('#pgArea')?.value||'Geral').trim();
+      const delta = parseInt($('#pgDelta')?.value||'0',10);
+      const note = ($('#pgNote')?.value||'').trim();
+      if(!delta || delta<1) return;
+      addXP(area, delta, note);
+      closeDlg();
+    });
+
+    function addXP(area, delta, note){
+      let {level, xp} = loadProgress();
+      xp += delta;
+      while(xp >= xpNeeded(level)){
+        xp -= xpNeeded(level); level += 1;
+        announce(`Parabéns! Você alcançou o nível ${level}.`);
+      }
+      saveProgress(level, xp);
+      const evs = loadEvents();
+      evs.push({ id: Date.now()+"_"+Math.random().toString(36).slice(2), ts: new Date().toISOString(), delta, area, note });
+      saveEvents(evs);
+      refreshAll();
+    }
+
+    /* ==== SUGESTÕES DE ÁREA (datalist) ==== */
+    function seedAreaDatalist(){
+      const dl = $('#pgAreaList'); if(!dl) return;
+      dl.innerHTML='';
+      const set = new Set();
+      loadEvents().forEach(ev=> set.add(ev.area||'Geral'));
+      if(Array.isArray(window.LMU_SUBAREAS)){ window.LMU_SUBAREAS.forEach(a=> set.add(a)); }
+      Array.from(set).filter(Boolean).slice(0,40).forEach(name=>{
+        const opt = document.createElement('option'); opt.value = name; dl.appendChild(opt);
+      });
+    }
+
+    /* ==== THEME (quando aberto direto) ==== */
+    (function bootThemeMPA(){
+      try{ if(localStorage.getItem('lmup_theme')==='dark') document.body.classList.add('dark-mode'); }catch{}
+      const metas = document.querySelectorAll('meta[name="theme-color"]');
+      const isDark = document.body.classList.contains('dark-mode');
+      metas.forEach(m=> m.setAttribute('content', isDark ? '#0b2533' : '#0b3042'));
+    })();
+
+    /* ==== UTIL ==== */
+    function escapeHTML(s){ return String(s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    /* ==== REFRESH GERAL ==== */
+    function refreshAll(){
+      renderHeader();
+      renderProfile();
+      renderSubjects();
+      renderHeatmap();
+      renderMastery();
+      renderHistory();
+      seedAreaDatalist();
+    }
+
+    // Inicializa ao abrir direto
+    refreshAll();
+
+    // Exponho initProgressPage() para o host (router SPA)
+    if(!window.initProgressPage){
+      window.initProgressPage = refreshAll;
+    }
+  })();
+  </script>
+</body>
+</html>
