@@ -52,6 +52,7 @@
       --card-dark: #1f1f1f;
       --border: #e5e7eb;
       --border-dark: #2c2c2c;
+      --border-dark-contrast: #e0e0e0;
       --accent: #8b5cf6;
       --secondary: #f6c453;
       --soft: #f3f4f6;
@@ -159,7 +160,7 @@
 
     /* Dark mode básico quando aberto direto (MPA) */
     .dark-mode{ background:var(--bg-dark); color:var(--text-dark); }
-    .dark-mode .card, .dark-mode .subject-tile, .dark-mode .quest{ background:var(--card-dark); border-color:var(--border-dark); }
+    .dark-mode .card, .dark-mode .subject-tile, .dark-mode .quest{ background:var(--card-dark); border:1px solid var(--border-dark-contrast); }
 
     /* Link do logo no progresso */
     .brand-link{
@@ -199,7 +200,7 @@
     /* botões no dark: deixam de ser clarinhos */
     body.dark-mode .btn{
       background:#262626;
-      border-color: var(--border-dark);
+      border: 1px solid var(--border-dark-contrast);
       color: var(--text-dark);
     }
     body.dark-mode .btn:hover{ filter:brightness(1.05); }
@@ -235,7 +236,7 @@
     body.dark-mode .widget {
       background: var(--card-dark);
       color: var(--text-dark);
-      border-color: var(--border-dark);
+      border: 1px solid var(--border-dark-contrast);
     }
 
     /* Pílulas / badges / tags (os “Recente”, “Foco”, etc) */
@@ -249,16 +250,16 @@
     body.dark-mode [class*="tag"]{
       background: hsl(0 0% 22%);
       color: var(--text-dark);
-      border: 1px solid var(--border-dark);
+      border: 1px solid var(--border-dark-contrast);
     }
     /* Tabelas (Histórico) */
     body.dark-mode table { color: var(--text-dark); }
     body.dark-mode th {
       background: var(--card-dark);
       color: var(--text-dark);
-      border-bottom: 1px solid var(--border-dark);
+      border-bottom: 1px solid var(--border-dark-contrast);
     }
-    body.dark-mode td { border-top: 1px solid var(--border-dark); }
+    body.dark-mode td { border-top: 1px solid var(--border-dark-contrast); }
 
     /* Legendas/pequenos textos dentro de widgets escuros */
     body.dark-mode .legend,
