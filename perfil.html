@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="pt-BR" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Perfil — Level Me Up!</title>
+  <meta name="description" content="Veja estatísticas, conquistas e personalize seu perfil no Level Me Up!" />
+
+  <!-- Favicon neutro -->
+  <link rel="icon" href="data:,">
+  <link rel="shortcut icon" href="data:,">
+
+  <!-- Theme color -->
+  <meta name="theme-color" content="#0b3042" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b2533" media="(prefers-color-scheme: dark)">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- CSP -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 script-src 'self' 'nonce-lmup-2025';
+                 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
+                 img-src 'self' data:;
+                 font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+                 connect-src 'self';
+                 object-src 'none';
+                 base-uri 'none';
+                 worker-src 'self'">
+
+  <!-- Fonts & Ícones -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      color-scheme: light dark;
+      --bg: #f7f8fa;
+      --bg-dark: #14181b;
+      --card: #ffffff;
+      --card-dark: #1d2125;
+      --border: #e5e7eb;
+      --border-dark: #2f3338;
+      --border-dark-contrast: #dde1e6;
+      --text: #1f2933;
+      --text-subtle: #52606d;
+      --text-dark: #f5f7fa;
+      --accent: #8b5cf6;
+      --accent-soft: rgba(139, 92, 246, 0.12);
+      --secondary: #f6c453;
+      --focus: #8b5cf6;
+      --radius: 12px;
+      --shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
+      --shadow-dark: 0 10px 28px rgba(0, 0, 0, 0.35);
+      --tap: 24px;
+    }
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family:'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height:1.5;
+    }
+    a{ color: inherit; }
+    .sr-only{
+      position:absolute!important;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;
+      border:0;
+    }
+    .skip-link{
+      position:absolute;
+      top:8px;
+      left:8px;
+      padding:8px 12px;
+      background: var(--secondary);
+      color:#111;
+      border-radius:8px;
+      transform: translateY(-200%);
+      transition: transform .2s ease;
+      z-index:1000;
+      text-decoration:none;
+      font-weight:600;
+    }
+    .skip-link:focus-visible{ transform: translateY(0); }
+    :where(button,a,input,textarea,select){ min-width:var(--tap); min-height:var(--tap); }
+    :where(button,a,input,textarea,select):focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+    @media (prefers-reduced-motion: reduce){ *{ animation:none!important; transition:none!important; } }
+
+    main{ padding:32px 0 48px; }
+    .wrap{ max-width:1180px; margin:0 auto; padding:0 16px; }
+    .grid{ display:grid; grid-template-columns: minmax(0,2fr) minmax(260px,1fr); gap:20px; align-items:start; }
+    .column{ display:flex; flex-direction:column; gap:20px; }
+    .card{
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding:20px;
+      box-shadow: var(--shadow);
+    }
+    .card h2{ margin:0 0 12px; font-size:20px; }
+
+    .profile-hero{
+      padding:0;
+      overflow:hidden;
+    }
+    .banner{
+      position:relative;
+      background: linear-gradient(135deg, rgba(15,76,129,0.85), rgba(139,92,246,0.85));
+      height:160px;
+    }
+    .banner::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" fill="none"%3E%3Cpath d="M0 160L80 80L160 200" stroke="rgba(255,255,255,0.15)" stroke-width="16"/%3E%3C/svg%3E');
+      opacity:.6;
+      pointer-events:none;
+    }
+    .banner-btn{
+      position:absolute;
+      right:16px;
+      bottom:16px;
+      border:1px solid rgba(255,255,255,0.6);
+      background:rgba(255,255,255,0.2);
+      color:#fff;
+      padding:6px 12px;
+      border-radius:999px;
+      backdrop-filter: blur(6px);
+      font-weight:600;
+    }
+    .banner-btn:hover{ background:rgba(255,255,255,0.28); }
+
+    .profile-core{
+      display:flex;
+      flex-wrap:wrap;
+      gap:18px;
+      padding:0 24px 24px;
+      margin-top:-52px;
+    }
+    .avatar{
+      width:108px;
+      height:108px;
+      border-radius:24px;
+      background:#fff;
+      display:grid;
+      place-items:center;
+      font-size:36px;
+      font-weight:800;
+      color:#0b3042;
+      border:4px solid #fff;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .profile-info{ flex:1; min-width:220px; display:flex; flex-direction:column; gap:12px; }
+    .profile-name{ font-size:28px; font-weight:800; }
+    .profile-subtitle{ margin:0; color: var(--text-subtle); font-size:15px; }
+    .profile-badges{ list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:12px; }
+    .profile-badges li{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 12px;
+      border-radius:999px;
+      background:var(--accent-soft);
+      color:var(--accent);
+      font-weight:600;
+    }
+    .profile-badges strong{ font-size:18px; }
+
+    .stats-list{ list-style:none; padding:0; margin:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
+    .stats-list li{
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:12px;
+      background:rgba(139,92,246,0.05);
+    }
+    .stats-list h3{ margin:0 0 4px; font-size:16px; }
+    .stats-list p{ margin:0; color:var(--text-subtle); font-size:14px; }
+
+    .activity-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
+    .activity-item{
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:12px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .activity-header{ display:flex; justify-content:space-between; gap:10px; font-weight:700; }
+    .activity-header span{ display:inline-flex; align-items:center; gap:6px; }
+    .activity-note{ color:var(--text-subtle); font-size:14px; }
+    .activity-meta{ font-size:13px; color:var(--text-subtle); display:flex; gap:10px; flex-wrap:wrap; }
+
+    .achievements-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+    .achievement{
+      border:1px dashed var(--border);
+      border-radius:14px;
+      padding:14px;
+      background:rgba(255,255,255,0.6);
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      align-items:flex-start;
+    }
+    .achievement i{ font-size:20px; }
+    .achievement strong{ font-size:16px; }
+    .achievement p{ margin:0; font-size:13px; color:var(--text-subtle); }
+    .achievement.unlocked{
+      border-style:solid;
+      border-color:var(--accent);
+      background:rgba(139,92,246,0.1);
+      color:var(--accent);
+    }
+    .achievement.unlocked p{ color:inherit; }
+
+    .friends-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
+    .friend-card{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      background:rgba(15,76,129,0.04);
+    }
+    .friend-avatar{
+      width:44px;
+      height:44px;
+      border-radius:12px;
+      background:var(--accent-soft);
+      color:var(--accent);
+      display:grid;
+      place-items:center;
+      font-weight:700;
+    }
+    .friend-meta{ font-size:13px; color:var(--text-subtle); }
+
+    .settings-card form{ display:flex; flex-direction:column; gap:14px; }
+    .settings-card fieldset{ border:0; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+    .settings-card legend{ font-weight:700; margin-bottom:4px; }
+    .input{
+      width:100%;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      font-size:15px;
+      background:#fff;
+      color:inherit;
+    }
+    .btn,
+    .btn-primary{
+      border-radius:10px;
+      padding:10px 14px;
+      font-weight:600;
+      border:1px solid var(--border);
+      background:#fff;
+      cursor:pointer;
+      transition: transform .16s ease, box-shadow .16s ease;
+    }
+    .btn-primary{
+      background:var(--secondary);
+      border-color:var(--secondary);
+      color:#111;
+      box-shadow:0 4px 12px rgba(246,196,83,0.4);
+    }
+    .btn:hover,
+    .btn-primary:hover{ transform: translateY(-1px); box-shadow:0 6px 16px rgba(15,23,42,0.12); }
+    .btn[aria-pressed="true"]{ background:var(--accent); color:#fff; border-color:var(--accent); }
+    .settings-help{ font-size:13px; color:var(--text-subtle); margin-top:-6px; }
+    .settings-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+
+    .theme-toggle{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px; border:1px solid var(--border); border-radius:12px; background:rgba(139,92,246,0.06); }
+    .theme-toggle strong{ font-size:15px; }
+
+    .empty-state{
+      border:2px dashed var(--border);
+      border-radius:12px;
+      padding:24px;
+      text-align:center;
+      color:var(--text-subtle);
+      background:rgba(255,255,255,0.5);
+    }
+    .empty-state a{ color:var(--accent); font-weight:700; }
+
+    footer{ margin-top:32px; text-align:center; font-size:13px; color:var(--text-subtle); }
+
+    .dark-mode{ background:var(--bg-dark); color:var(--text-dark); }
+    .dark-mode .card,
+    .dark-mode .activity-item,
+    .dark-mode .friend-card,
+    .dark-mode .theme-toggle,
+    .dark-mode .stats-list li{ background:var(--card-dark); border:1px solid var(--border-dark-contrast); box-shadow: var(--shadow-dark); }
+    .dark-mode .profile-badges li{ background:rgba(139,92,246,0.22); color:#f4ebff; }
+    .dark-mode .profile-subtitle,
+    .dark-mode .activity-note,
+    .dark-mode .activity-meta,
+    .dark-mode .friend-meta,
+    .dark-mode .settings-help,
+    .dark-mode footer{ color:rgba(226,232,240,0.82); }
+    .dark-mode .achievement{ background:rgba(29,33,37,0.9); border-color:var(--border-dark); }
+    .dark-mode .achievement.unlocked{ background:rgba(139,92,246,0.22); }
+    .dark-mode .input{ background:#161b1f; border-color:var(--border-dark); color:inherit; }
+    .dark-mode .btn{ background:#1f2429; border-color:var(--border-dark); }
+    .dark-mode .btn-primary{ color:#111; }
+    .dark-mode .empty-state{ background:rgba(29,33,37,0.8); border-color:var(--border-dark); }
+
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+      .profile-core{ margin-top:-40px; padding-bottom:20px; }
+      .avatar{ width:92px; height:92px; border-radius:20px; }
+    }
+    @media (max-width: 560px){
+      .profile-core{ flex-direction:column; align-items:flex-start; }
+      .profile-badges{ gap:8px; }
+      .stats-list{ grid-template-columns:1fr; }
+      .banner{ height:140px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Ir para o conteúdo principal</a>
+  <main id="conteudo">
+    <div class="wrap">
+      <section class="card profile-hero" aria-labelledby="profileTitle">
+        <div class="banner" role="img" aria-label="Banner personalizado do perfil">
+          <button id="bannerEditBtn" class="btn banner-btn" type="button">Editar banner</button>
+        </div>
+        <div class="profile-core">
+          <div class="avatar" id="profileAvatar" aria-hidden="true">
+            <span id="profileAvatarInitial">?</span>
+          </div>
+          <div class="profile-info">
+            <div class="profile-name" id="profileNameDisplay">Visitante</div>
+            <p class="profile-subtitle" id="profileSubtitle">Personalize sua jornada de aprendizado.</p>
+            <ul class="profile-badges" aria-label="Resumo rápido do perfil">
+              <li>
+                <span class="badge-label">Nível</span>
+                <strong id="profileLevelBadge">1</strong>
+              </li>
+              <li>
+                <span class="badge-label">XP total</span>
+                <strong id="profileTotalBadge">0</strong>
+              </li>
+              <li>
+                <span class="badge-label">Áreas</span>
+                <strong id="profileAreasBadge">0</strong>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid">
+        <div class="column main-column">
+          <section class="card stats-card" aria-labelledby="statsTitle">
+            <h2 id="statsTitle">Estatísticas &amp; progresso</h2>
+            <ul class="stats-list">
+              <li>
+                <h3>Progresso atual</h3>
+                <p id="statLevel">Nível 1</p>
+              </li>
+              <li>
+                <h3>Próximo marco</h3>
+                <p id="statNextLevel">Faltam 100 XP para o próximo nível.</p>
+              </li>
+              <li>
+                <h3>XP acumulado</h3>
+                <p id="statTotalXp">0 XP registrados.</p>
+              </li>
+              <li>
+                <h3>Áreas exploradas</h3>
+                <p id="statAreas">Nenhuma área registrada ainda.</p>
+              </li>
+              <li>
+                <h3>Streak de estudo</h3>
+                <p id="statStreak">Nenhum dia consecutivo ainda.</p>
+              </li>
+            </ul>
+          </section>
+
+          <section class="card activity-card" aria-labelledby="activityTitle">
+            <h2 id="activityTitle">Atividade recente</h2>
+            <ul id="recentActivityList" class="activity-list" aria-live="polite"></ul>
+          </section>
+
+          <section class="card achievements-card" aria-labelledby="achievementsTitle">
+            <h2 id="achievementsTitle">Conquistas</h2>
+            <div id="achievementsList" class="achievements-grid"></div>
+          </section>
+
+          <section class="card friends-card" aria-labelledby="friendsTitle">
+            <h2 id="friendsTitle">Amigos e mentores</h2>
+            <div class="friends-grid" id="friendsGrid">
+              <article class="friend-card">
+                <div class="friend-avatar" aria-hidden="true">AB</div>
+                <div>
+                  <strong>Ana Borges</strong>
+                  <div class="friend-meta">Mentora de UX — em breve</div>
+                </div>
+              </article>
+              <article class="friend-card">
+                <div class="friend-avatar" aria-hidden="true">LM</div>
+                <div>
+                  <strong>Luis Moraes</strong>
+                  <div class="friend-meta">Parceiro de estudos — em breve</div>
+                </div>
+              </article>
+              <article class="friend-card">
+                <div class="friend-avatar" aria-hidden="true">VS</div>
+                <div>
+                  <strong>Você +</strong>
+                  <div class="friend-meta">Convide amigos para comparar XP.</div>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <aside class="column side-column">
+          <section class="card settings-card" aria-labelledby="settingsTitle">
+            <h2 id="settingsTitle">Configurações do perfil</h2>
+            <form id="profileNameForm">
+              <fieldset>
+                <legend>Nome exibido</legend>
+                <input id="profileNameInput" class="input" maxlength="40" placeholder="Como você quer ser chamado?">
+                <p class="settings-help">Esse nome aparece na saudação da página inicial e em relatórios.</p>
+                <div class="settings-actions">
+                  <button class="btn-primary" type="submit">Salvar nome</button>
+                </div>
+              </fieldset>
+            </form>
+
+            <form id="profileAvatarForm">
+              <fieldset>
+                <legend>Avatar</legend>
+                <input id="profileAvatarInput" class="input" type="url" placeholder="Cole uma URL de imagem (PNG, JPG, SVG…)" inputmode="url">
+                <p class="settings-help">Use um link público ou deixe em branco para manter a inicial do seu nome.</p>
+                <div class="settings-actions">
+                  <button class="btn-primary" type="submit">Atualizar avatar</button>
+                  <button class="btn" type="button" id="profileAvatarReset">Remover avatar</button>
+                </div>
+              </fieldset>
+            </form>
+
+            <div class="theme-toggle" role="group" aria-labelledby="themeToggleLabel">
+              <div>
+                <strong id="themeToggleLabel">Tema do aplicativo</strong>
+                <p class="settings-help" id="themeToggleDesc">Escolha entre modo claro ou escuro. A preferência vale para todas as páginas.</p>
+              </div>
+              <button class="btn" id="profileThemeToggle" type="button" aria-pressed="false" aria-describedby="themeToggleDesc">Ativar modo escuro</button>
+            </div>
+          </section>
+
+          <section class="card" aria-labelledby="tipsTitle">
+            <h2 id="tipsTitle">Dicas rápidas</h2>
+            <ul class="stats-list">
+              <li>
+                <h3>Revise conquistas</h3>
+                <p>Veja o que falta para liberar os próximos badges.</p>
+              </li>
+              <li>
+                <h3>Sincronize com amigos</h3>
+                <p>Compartilhe seu link do Level Me Up! quando a funcionalidade estiver ativa.</p>
+              </li>
+              <li>
+                <h3>Atualize metas</h3>
+                <p>Use o registro de XP para planejar a próxima semana.</p>
+              </li>
+            </ul>
+          </section>
+        </aside>
+      </div>
+
+      <footer>
+        Mais novidades em breve: banner personalizável, rede de amigos e badges dinâmicos.
+      </footer>
+    </div>
+  </main>
+
+  <div id="profileLive" class="sr-only" aria-live="polite"></div>
+
+  <script nonce="lmup-2025" data-page-script>
+  (() => {
+    const K_NAME   = 'lmup_name';
+    const K_AVATAR = 'lmup_avatar_v1';
+    const K_THEME  = 'lmup_theme';
+    const K_LEVEL  = 'lmup_level';
+    const K_XP     = 'lmup_xp';
+    const K_EVENTS = 'lmup_xp_events_v1';
+
+    const safeGet = (k, fb = '') => { try { const v = localStorage.getItem(k); return v ?? fb; } catch { return fb; } };
+    const safeSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+    const safeRemove = (k) => { try { localStorage.removeItem(k); } catch {} };
+
+    const $ = (sel) => document.querySelector(sel);
+    const live = $('#profileLive');
+    const announce = (msg) => { if (live && msg) live.textContent = msg; };
+
+    const pad = (n) => String(n).padStart(2, '0');
+    const dayKey = (value) => {
+      if (!value) return '';
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return '';
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    };
+
+    const xpNeededForLevel = (lvl) => Math.max(100, lvl * 100);
+    const loadProgress = () => {
+      let level = parseInt(safeGet(K_LEVEL, '1'), 10);
+      let xp = parseInt(safeGet(K_XP, '0'), 10);
+      if (Number.isNaN(level) || level < 1) level = 1;
+      if (Number.isNaN(xp) || xp < 0) xp = 0;
+      return { level, xp };
+    };
+    const loadEvents = () => {
+      try {
+        return JSON.parse(localStorage.getItem(K_EVENTS) || '[]') || [];
+      } catch {
+        return [];
+      }
+    };
+
+    const totalXpFromProgress = (level, xp) => {
+      let total = xp;
+      for (let i = 1; i < level; i += 1) {
+        total += xpNeededForLevel(i);
+      }
+      return total;
+    };
+
+    const computeAreas = (events) => {
+      const areas = new Set();
+      events.forEach((ev) => {
+        const area = (ev?.area || '').trim();
+        if (area) areas.add(area);
+      });
+      return areas;
+    };
+
+    const computeStreak = (events) => {
+      if (!events.length) return 0;
+      const set = new Set(events.map((ev) => dayKey(ev.ts || ev.time)));
+      if (!set.size) return 0;
+      const now = new Date();
+      let streak = 0;
+      for (let offset = 0; offset < 365; offset += 1) {
+        const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - offset);
+        const key = `${day.getFullYear()}-${pad(day.getMonth() + 1)}-${pad(day.getDate())}`;
+        if (set.has(key)) {
+          streak += 1;
+        } else {
+          break;
+        }
+      }
+      return streak;
+    };
+
+    const formatDateTime = (value) => {
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return 'Data desconhecida';
+      return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeStyle: 'short' }).format(d);
+    };
+
+    const formatRelative = (value) => {
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return 'Sem registro ainda';
+      const now = new Date();
+      const diff = now - d;
+      const dayMs = 24 * 60 * 60 * 1000;
+      const days = Math.floor(diff / dayMs);
+      if (days <= 0) return 'Hoje';
+      if (days === 1) return 'Ontem';
+      if (days < 7) return `${days} dias atrás`;
+      const weeks = Math.floor(days / 7);
+      if (weeks === 1) return 'Há 1 semana';
+      if (weeks < 5) return `Há ${weeks} semanas`;
+      return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(d);
+    };
+
+    const updateThemeMeta = () => {
+      const metas = document.querySelectorAll('meta[name="theme-color"]');
+      const isDark = document.body.classList.contains('dark-mode');
+      const color = isDark ? '#0b2533' : '#0b3042';
+      metas.forEach((meta) => meta.setAttribute('content', color));
+    };
+
+    const updateThemeToggleUI = () => {
+      const btn = $('#profileThemeToggle');
+      if (!btn) return;
+      const isDark = document.body.classList.contains('dark-mode');
+      btn.textContent = isDark ? 'Ativar modo claro' : 'Ativar modo escuro';
+      btn.setAttribute('aria-pressed', String(isDark));
+    };
+
+    const applyThemePreference = () => {
+      const stored = safeGet(K_THEME, 'light');
+      const shouldDark = stored === 'dark';
+      document.body.classList.toggle('dark-mode', shouldDark);
+      updateThemeMeta();
+      updateThemeToggleUI();
+    };
+
+    const renderProfile = () => {
+      const name = (safeGet(K_NAME, '') || '').trim() || 'Visitante';
+      const avatar = (safeGet(K_AVATAR, '') || '').trim();
+      const { level, xp } = loadProgress();
+      const events = loadEvents();
+      const areas = computeAreas(events);
+      const totalXp = Math.max(
+        totalXpFromProgress(level, xp),
+        events.reduce((acc, ev) => acc + Number(ev?.delta || 0), 0)
+      );
+
+      const nameDisplay = $('#profileNameDisplay');
+      if (nameDisplay) nameDisplay.textContent = name;
+
+      const subtitle = $('#profileSubtitle');
+      if (subtitle) {
+        const last = events.slice().sort((a, b) => new Date(b.ts || 0) - new Date(a.ts || 0))[0];
+        subtitle.textContent = last ? `Última atividade: ${formatRelative(last.ts || last.time)}` : 'Ainda não registrou nenhuma atividade. Comece registrando XP!';
+      }
+
+      const avatarBox = $('#profileAvatar');
+      if (avatarBox) {
+        avatarBox.innerHTML = '';
+        if (avatar) {
+          const img = document.createElement('img');
+          img.src = avatar;
+          img.alt = `Avatar de ${name}`;
+          avatarBox.appendChild(img);
+        } else {
+          const span = document.createElement('span');
+          const first = name.trim()[0] ? name.trim()[0].toUpperCase() : '?';
+          span.textContent = first;
+          span.id = 'profileAvatarInitial';
+          avatarBox.appendChild(span);
+        }
+      }
+
+      const profileLevelBadge = $('#profileLevelBadge');
+      if (profileLevelBadge) profileLevelBadge.textContent = String(level);
+      const profileTotalBadge = $('#profileTotalBadge');
+      if (profileTotalBadge) profileTotalBadge.textContent = `${totalXp} XP`;
+      const profileAreasBadge = $('#profileAreasBadge');
+      if (profileAreasBadge) profileAreasBadge.textContent = String(areas.size);
+
+      const nameInput = $('#profileNameInput');
+      if (nameInput && document.activeElement !== nameInput) nameInput.value = name;
+
+      const avatarInput = $('#profileAvatarInput');
+      if (avatarInput && document.activeElement !== avatarInput) avatarInput.value = avatar;
+    };
+
+    const renderStats = () => {
+      const { level, xp } = loadProgress();
+      const needed = xpNeededForLevel(level);
+      const events = loadEvents();
+      const areas = computeAreas(events);
+      const streak = computeStreak(events);
+      const total = Math.max(
+        totalXpFromProgress(level, xp),
+        events.reduce((acc, ev) => acc + Number(ev?.delta || 0), 0)
+      );
+
+      const statLevel = $('#statLevel');
+      if (statLevel) statLevel.textContent = `Nível ${level} — ${xp} XP no nível atual.`;
+      const statNext = $('#statNextLevel');
+      if (statNext) statNext.textContent = `Faltam ${Math.max(0, needed - xp)} XP para subir para o nível ${level + 1}.`;
+      const statTotal = $('#statTotalXp');
+      if (statTotal) statTotal.textContent = total > 0 ? `${total} XP acumulados ao todo.` : '0 XP registrados.';
+      const statAreas = $('#statAreas');
+      if (statAreas) statAreas.textContent = areas.size ? `${areas.size} área(s) diferentes registradas.` : 'Nenhuma área registrada ainda.';
+      const statStreak = $('#statStreak');
+      if (statStreak) statStreak.textContent = streak ? `${streak} dia(s) consecutivos de estudo.` : 'Nenhum dia consecutivo ainda.';
+    };
+
+    const renderActivity = () => {
+      const list = $('#recentActivityList');
+      if (!list) return;
+      list.innerHTML = '';
+      const events = loadEvents()
+        .slice()
+        .sort((a, b) => new Date(b.ts || 0) - new Date(a.ts || 0))
+        .slice(0, 6);
+      if (!events.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerHTML = 'Sem atividades ainda. <a href="progresso.html" data-nav="progresso">Registre XP na página de progresso</a> para preencher este histórico.';
+        list.appendChild(empty);
+        return;
+      }
+      events.forEach((ev) => {
+        const item = document.createElement('li');
+        item.className = 'activity-item';
+        const header = document.createElement('div');
+        header.className = 'activity-header';
+        const xp = document.createElement('span');
+        xp.innerHTML = `<i class="fa-solid fa-bolt"></i> +${Number(ev?.delta || 0)} XP`;
+        const area = document.createElement('span');
+        const areaName = (ev?.area || 'Área geral').trim() || 'Área geral';
+        area.innerHTML = `<i class="fa-solid fa-layer-group"></i> ${areaName}`;
+        header.appendChild(xp);
+        header.appendChild(area);
+        item.appendChild(header);
+
+        if (ev?.note) {
+          const note = document.createElement('div');
+          note.className = 'activity-note';
+          note.textContent = ev.note;
+          item.appendChild(note);
+        }
+
+        const meta = document.createElement('div');
+        meta.className = 'activity-meta';
+        const time = document.createElement('time');
+        time.dateTime = ev?.ts || '';
+        time.textContent = formatDateTime(ev?.ts || ev?.time);
+        meta.appendChild(time);
+        item.appendChild(meta);
+
+        list.appendChild(item);
+      });
+    };
+
+    const renderAchievements = () => {
+      const container = $('#achievementsList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const { level, xp } = loadProgress();
+      const events = loadEvents();
+      const areas = computeAreas(events).size;
+      const streak = computeStreak(events);
+      const total = Math.max(
+        totalXpFromProgress(level, xp),
+        events.reduce((acc, ev) => acc + Number(ev?.delta || 0), 0)
+      );
+
+      const achievements = [
+        {
+          id: 'first-xp',
+          icon: 'fa-seedling',
+          title: 'Primeiro passo',
+          desc: 'Ganhe XP pela primeira vez.',
+          unlocked: total > 0,
+        },
+        {
+          id: 'level-5',
+          icon: 'fa-rocket',
+          title: 'Impulsionado',
+          desc: 'Alcance o nível 5.',
+          unlocked: level >= 5,
+        },
+        {
+          id: 'areas-3',
+          icon: 'fa-compass',
+          title: 'Explorador',
+          desc: 'Registre XP em 3 áreas diferentes.',
+          unlocked: areas >= 3,
+        },
+        {
+          id: 'streak-3',
+          icon: 'fa-fire',
+          title: 'Foco total',
+          desc: 'Mantenha uma sequência de 3 dias.',
+          unlocked: streak >= 3,
+        },
+        {
+          id: 'level-10',
+          icon: 'fa-trophy',
+          title: 'Mentor em formação',
+          desc: 'Chegue ao nível 10.',
+          unlocked: level >= 10,
+        },
+      ];
+
+      achievements.forEach((ach) => {
+        const card = document.createElement('article');
+        card.className = `achievement${ach.unlocked ? ' unlocked' : ''}`;
+        card.setAttribute('data-achievement', ach.id);
+        const icon = document.createElement('i');
+        icon.className = `fa-solid ${ach.icon}`;
+        icon.setAttribute('aria-hidden', 'true');
+        const title = document.createElement('strong');
+        title.textContent = ach.title;
+        const desc = document.createElement('p');
+        desc.textContent = ach.desc;
+        if (!ach.unlocked) {
+          const lock = document.createElement('span');
+          lock.className = 'settings-help';
+          lock.textContent = 'Em progresso';
+          desc.appendChild(document.createTextNode(' '));
+          desc.appendChild(lock);
+        }
+        card.appendChild(icon);
+        card.appendChild(title);
+        card.appendChild(desc);
+        container.appendChild(card);
+      });
+    };
+
+    const refreshAll = () => {
+      applyThemePreference();
+      renderProfile();
+      renderStats();
+      renderActivity();
+      renderAchievements();
+    };
+
+    const bindEvents = () => {
+      const nameForm = $('#profileNameForm');
+      if (nameForm && !nameForm.__lmu_bound) {
+        nameForm.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const input = $('#profileNameInput');
+          const value = (input?.value || '').trim();
+          const finalValue = value || 'Visitante';
+          safeSet(K_NAME, finalValue);
+          renderProfile();
+          announce('Nome atualizado com sucesso.');
+          const ev = new Event('lmu:name-changed');
+          window.dispatchEvent(ev);
+          window.refreshNameOnTopbar?.();
+        });
+        nameForm.__lmu_bound = true;
+      }
+
+      const avatarForm = $('#profileAvatarForm');
+      if (avatarForm && !avatarForm.__lmu_bound) {
+        avatarForm.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const input = $('#profileAvatarInput');
+          const value = (input?.value || '').trim();
+          if (value) {
+            safeSet(K_AVATAR, value);
+            announce('Avatar atualizado.');
+          } else {
+            safeRemove(K_AVATAR);
+            announce('Avatar removido.');
+          }
+          renderProfile();
+        });
+        avatarForm.__lmu_bound = true;
+      }
+
+      const avatarReset = $('#profileAvatarReset');
+      if (avatarReset && !avatarReset.__lmu_bound) {
+        avatarReset.addEventListener('click', () => {
+          safeRemove(K_AVATAR);
+          renderProfile();
+          announce('Avatar removido.');
+        });
+        avatarReset.__lmu_bound = true;
+      }
+
+      const themeBtn = $('#profileThemeToggle');
+      if (themeBtn && !themeBtn.__lmu_bound) {
+        themeBtn.addEventListener('click', () => {
+          const willDark = !document.body.classList.contains('dark-mode');
+          document.body.classList.toggle('dark-mode', willDark);
+          safeSet(K_THEME, willDark ? 'dark' : 'light');
+          updateThemeMeta();
+          updateThemeToggleUI();
+          announce(willDark ? 'Modo escuro ativado.' : 'Modo claro ativado.');
+          window.dispatchEvent(new Event('lmu:theme-changed'));
+        });
+        themeBtn.__lmu_bound = true;
+      }
+
+      const bannerBtn = $('#bannerEditBtn');
+      if (bannerBtn && !bannerBtn.__lmu_bound) {
+        bannerBtn.addEventListener('click', () => {
+          announce('Personalização de banner chegará em breve.');
+        });
+        bannerBtn.__lmu_bound = true;
+      }
+    };
+
+    const handleStorage = (event) => {
+      if (!event) return;
+      if (event.key === K_NAME || event.key === K_AVATAR) {
+        renderProfile();
+      }
+      if (event.key === K_LEVEL || event.key === K_XP || event.key === K_EVENTS) {
+        renderStats();
+        renderActivity();
+        renderAchievements();
+      }
+      if (event.key === K_THEME) {
+        applyThemePreference();
+      }
+    };
+
+    const handleNameChanged = () => { renderProfile(); };
+    const handleThemeChanged = () => { updateThemeToggleUI(); updateThemeMeta(); };
+
+    const init = () => {
+      bindEvents();
+      refreshAll();
+    };
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('lmu:name-changed', handleNameChanged);
+    window.addEventListener('lmu:theme-changed', handleThemeChanged);
+
+    init();
+
+    window.initPerfilPage = init;
+  })();
+  </script>
+</body>
+</html>
