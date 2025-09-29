@@ -70,6 +70,7 @@
       --color-card-bg-dark: hsl(0 0% 17%);
       --color-sidebar-bg-dark: hsl(0 0% 16%);
       --color-border-dark: hsl(0 0% 27%);
+      --color-border-dark-contrast: hsl(0 0% 88%);
       --color-topbar-bg-dark: hsl(198 63% 12%);
       --focus-ring: hsl(265 100% 60%);
       --tap-min: 24px;
@@ -91,6 +92,7 @@
         --color-card-bg-dark: oklch(28% 0.01 255);
         --color-sidebar-bg-dark: oklch(27% 0.01 255);
         --color-border-dark: oklch(40% 0.02 255);
+        --color-border-dark-contrast: oklch(88% 0.01 255);
         --color-topbar-bg-dark: oklch(28% 0.05 235);
         --focus-ring: oklch(54% 0.29 285);
         --color-gold: oklch(82% 0.17 85);
@@ -243,7 +245,7 @@
     body.dark-mode{ background:var(--color-bg-dark); color:var(--color-text-dark); }
     body.dark-mode .topbar{ background:var(--color-topbar-bg-dark); color:var(--color-text-dark); }
     body.dark-mode .sidebar{ background:var(--color-sidebar-bg-dark); border-right:1px solid var(--color-border-dark); }
-    body.dark-mode .subarea-card{ background:var(--color-card-bg-dark); border-color:var(--color-border-dark); color:var(--color-text-dark); }
+    body.dark-mode .subarea-card{ background:var(--color-card-bg-dark); border:1px solid var(--color-border-dark-contrast); color:var(--color-text-dark); }
     body.dark-mode .nav-section a{ color:var(--color-text-dark); }
     body.dark-mode .nav-section a:hover{ color:var(--color-accent); }
     body.dark-mode .subarea-mestre{ background:hsl(0 0% 26%); }
