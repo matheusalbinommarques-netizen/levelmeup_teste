@@ -851,6 +851,16 @@
     syncDevControlsUI();
   });
 
+  document.addEventListener('keydown', (e)=>{
+    if(e.key !== 'F8') return;
+    e.preventDefault();
+    toggleDevTools();
+  });
+
+  if(window?.console?.info){
+    console.info('Modo desenvolvedor: use o botão dedicado ou a tecla F8 para alternar a visibilidade do XP Boost.');
+  }
+
   const announce = msg => { if (msg) { document.getElementById('xpLive').textContent = msg; } };
 
   function openLevelDialog(){
