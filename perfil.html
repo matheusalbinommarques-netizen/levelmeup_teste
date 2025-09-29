@@ -126,7 +126,7 @@
       background-position: center, center;
       background-repeat: no-repeat, no-repeat;
       isolation:isolate;
-      border:1px solid var(--border);
+      border:1px solid var(--border-dark-contrast);
     }
     .banner::before{
       content:"";
@@ -152,19 +152,67 @@
     .banner[data-has-image="true"]::after{
       opacity:.35;
     }
+    #bannerToast{
+      position:absolute;
+      right:16px;
+      bottom:72px;
+      padding:10px 14px;
+      border-radius:12px;
+      font-size:14px;
+      font-weight:700;
+      background:rgba(15,23,42,0.86);
+      color:#f9fafb;
+      border:1px solid rgba(15,23,42,0.4);
+      box-shadow:0 10px 24px rgba(15,23,42,0.2);
+      opacity:0;
+      transform: translateY(6px);
+      pointer-events:none;
+      transition: opacity .24s ease, transform .24s ease;
+      max-width:min(280px, calc(100% - 32px));
+      backdrop-filter: blur(12px);
+      z-index:2;
+    }
+    #bannerToast.is-visible{
+      opacity:1;
+      transform: translateY(0);
+    }
+    #bannerToast.is-success{
+      background:linear-gradient(135deg, #0f766e, #14b8a6);
+      border-color:rgba(15,118,110,0.7);
+      color:#f0fdfa;
+    }
+    #bannerToast.is-error{
+      background:linear-gradient(135deg, #b91c1c, #ef4444);
+      border-color:rgba(185,28,28,0.7);
+      color:#fff5f5;
+    }
+    .dark-mode #bannerToast{
+      box-shadow:var(--shadow-dark);
+      border-color:rgba(148,163,184,0.3);
+    }
+    .dark-mode #bannerToast.is-success{
+      border-color:rgba(20,184,166,0.6);
+    }
+    .dark-mode #bannerToast.is-error{
+      border-color:rgba(248,113,113,0.6);
+    }
     .banner-btn{
       position:absolute;
       right:16px;
       bottom:16px;
-      border:1px solid rgba(0,0,0,0.08);
-      background:rgba(255,255,255,0.92);
-      color:#1d1d1f;
-      padding:6px 12px;
+      border:1px solid rgba(11,48,66,0.16);
+      background:linear-gradient(135deg, rgba(255,255,255,0.98), rgba(235,242,255,0.95));
+      color:#0b3042;
+      padding:6px 14px;
       border-radius:999px;
       backdrop-filter: blur(6px);
       font-weight:600;
     }
-    .banner-btn:hover{ background:rgba(255,255,255,0.96); }
+    .banner-btn:hover,
+    .banner-btn:focus-visible{
+      background:linear-gradient(135deg, rgba(255,255,255,1), rgba(221,232,255,0.98));
+      box-shadow:0 6px 18px rgba(15,23,42,0.18);
+    }
 
     .profile-core{
       display:flex;
@@ -191,19 +239,23 @@
     }
     .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
     .profile-info{ flex:1; min-width:220px; display:flex; flex-direction:column; gap:12px; }
-    .profile-name{ font-size:28px; font-weight:800; }
-    .profile-subtitle{ margin:0; color: var(--text-subtle); font-size:15px; }
-    .profile-badges{ list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:12px; }
-    .profile-badges li{
-      display:flex;
+    .profile-name{ font-size:26px; font-weight:800; }
+    .pill{
+      display:inline-flex;
       align-items:center;
       gap:6px;
-      padding:6px 12px;
+      padding:6px 14px;
       border-radius:999px;
       background:var(--accent-soft);
       color:var(--accent);
-      font-weight:600;
+      font-weight:700;
+      border:1px solid rgba(139,92,246,0.32);
+      box-shadow:0 2px 6px rgba(15,23,42,0.08);
     }
+    .profile-name.pill{ letter-spacing:0.2px; }
+    .profile-subtitle{ margin:0; color: var(--text-subtle); font-size:15px; }
+    .profile-badges{ list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:12px; }
+    .profile-badges li{ display:flex; align-items:center; gap:6px; }
     .profile-badges strong{ font-size:18px; }
 
     .stats-list{ list-style:none; padding:0; margin:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
@@ -329,7 +381,7 @@
     .dark-mode .friend-card,
     .dark-mode .theme-toggle,
     .dark-mode .stats-list li{ background:var(--card-dark); border:1px solid var(--border-dark-contrast); box-shadow: var(--shadow-dark); }
-    .dark-mode .profile-badges li{ background:rgba(139,92,246,0.22); color:#f4ebff; }
+    .dark-mode .pill{ background:rgba(139,92,246,0.22); color:#f4ebff; border-color:rgba(139,92,246,0.5); box-shadow:0 4px 14px rgba(0,0,0,0.35); }
     .dark-mode .profile-subtitle,
     .dark-mode .activity-note,
     .dark-mode .activity-meta,
@@ -370,24 +422,25 @@
         <div class="banner" role="img" aria-label="Banner personalizado do perfil">
           <input id="bannerFileInput" type="file" accept="image/png, image/jpeg, image/webp" hidden aria-hidden="true">
           <button id="bannerEditBtn" class="btn banner-btn" type="button">Editar banner</button>
+          <div id="bannerToast" role="status" aria-live="polite"></div>
         </div>
         <div class="profile-core">
           <div class="avatar" id="profileAvatar" aria-hidden="true">
             <span id="profileAvatarInitial">?</span>
           </div>
           <div class="profile-info">
-            <div class="profile-name" id="profileNameDisplay">Visitante</div>
+            <div class="profile-name pill" id="profileNameDisplay">Visitante</div>
             <p class="profile-subtitle" id="profileSubtitle">Personalize sua jornada de aprendizado.</p>
             <ul class="profile-badges" aria-label="Resumo rápido do perfil">
-              <li>
+              <li class="pill">
                 <span class="badge-label">Nível</span>
                 <strong id="profileLevelBadge">1</strong>
               </li>
-              <li>
+              <li class="pill">
                 <span class="badge-label">XP total</span>
                 <strong id="profileTotalBadge">0</strong>
               </li>
-              <li>
+              <li class="pill">
                 <span class="badge-label">Áreas</span>
                 <strong id="profileAreasBadge">0</strong>
               </li>
@@ -535,6 +588,7 @@
     const K_XP     = 'lmup_xp';
     const K_EVENTS = 'lmup_xp_events_v1';
     const BANNER_ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+    const BANNER_MAX_SIZE = 3000000;
 
     const safeGet = (k, fb = '') => { try { const v = localStorage.getItem(k); return v ?? fb; } catch { return fb; } };
     const safeSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
@@ -543,6 +597,23 @@
     const $ = (sel) => document.querySelector(sel);
     const live = $('#profileLive');
     const announce = (msg) => { if (live && msg) live.textContent = msg; };
+    const bannerToastEl = $('#bannerToast');
+    let bannerToastTimer = null;
+    const showBannerToast = (message, type = 'success') => {
+      if (!bannerToastEl || !message) return;
+      bannerToastEl.textContent = message;
+      bannerToastEl.classList.remove('is-success', 'is-error', 'is-visible');
+      void bannerToastEl.offsetWidth;
+      bannerToastEl.classList.add(type === 'error' ? 'is-error' : 'is-success');
+      bannerToastEl.classList.add('is-visible');
+      if (bannerToastTimer) {
+        clearTimeout(bannerToastTimer);
+        bannerToastTimer = null;
+      }
+      bannerToastTimer = setTimeout(() => {
+        bannerToastEl.classList.remove('is-visible');
+      }, 3800);
+    };
 
     const pad = (n) => String(n).padStart(2, '0');
     const dayKey = (value) => {
@@ -958,18 +1029,21 @@
             : /\.(png|jpe?g|webp)$/i.test(file.name || '');
           if (!matchesType) {
             announce('Selecione uma imagem válida para o banner.');
+            showBannerToast('Erro: Formato de arquivo não suportado.', 'error');
             bannerInput.value = '';
             return;
           }
 
-          if (file.size > 1000000) {
-            announce('O arquivo é muito grande. O limite é 1000KB.');
+          if (file.size > BANNER_MAX_SIZE) {
+            announce('O arquivo é muito grande. O limite é de 3MB.');
+            showBannerToast('Erro: Arquivo muito grande (máximo 3MB).', 'error');
             bannerInput.value = '';
             return;
           }
 
           if (typeof FileReader === 'undefined') {
             announce('Seu navegador não suporta upload de banner.');
+            showBannerToast('Erro: Navegador não suporta upload de banner.', 'error');
             bannerInput.value = '';
             return;
           }
@@ -981,13 +1055,16 @@
               safeSet(K_BANNER, result);
               renderBanner();
               announce('Banner atualizado com sucesso.');
+              showBannerToast('Banner atualizado!', 'success');
             } else {
               announce('Não foi possível atualizar o banner.');
+              showBannerToast('Erro: Não foi possível atualizar o banner.', 'error');
             }
             bannerInput.value = '';
           });
           reader.addEventListener('error', () => {
             announce('Não foi possível ler o arquivo selecionado.');
+            showBannerToast('Erro: Falha ao ler o arquivo selecionado.', 'error');
             bannerInput.value = '';
           });
 
@@ -996,6 +1073,7 @@
           } catch (err) {
             console.error(err);
             announce('Não foi possível processar o arquivo de banner.');
+            showBannerToast('Erro: Não foi possível processar o banner.', 'error');
             bannerInput.value = '';
           }
         });
