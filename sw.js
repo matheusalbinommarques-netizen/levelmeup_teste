@@ -1,8 +1,8 @@
 // sw.js
-// SW v1.0.9 — precache do shell + stale-while-revalidate para assets (mesmo-origin)
+// SW v1.0.10 — precache do shell + stale-while-revalidate para assets (mesmo-origin)
 
 const CACHE_PREFIX = 'lmu-cache';
-const VERSION = 'v1.0.9';
+const VERSION = 'v1.0.10';
 const PRECACHE = `${CACHE_PREFIX}-precache-${VERSION}`;
 const RUNTIME  = `${CACHE_PREFIX}-runtime-${VERSION}`;
 
@@ -10,6 +10,7 @@ const APP_SHELL = [
   './',
   './index.html',
   './progresso.html',
+  './perfil.html',
   './manifest.json',
   './sw.js'
 ];
