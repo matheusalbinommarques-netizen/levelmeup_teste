@@ -126,6 +126,7 @@
       background-position: center, center;
       background-repeat: no-repeat, no-repeat;
       isolation:isolate;
+      border:1px solid var(--border);
     }
     .banner::before{
       content:"";
@@ -341,6 +342,8 @@
     .dark-mode .btn{ background:#1f2429; border-color:var(--border-dark); }
     .dark-mode .btn-primary{ color:#111; }
     .dark-mode .empty-state{ background:rgba(29,33,37,0.8); border-color:var(--border-dark); }
+    .dark-mode .banner{ border-color:var(--border-dark); }
+    .dark-mode .banner-btn{ color:var(--text-dark); }
 
     @media (max-width: 980px){
       .grid{ grid-template-columns: 1fr; }
@@ -929,6 +932,7 @@
       if (bannerBtn && !bannerBtn.__lmu_bound) {
         bannerBtn.addEventListener('click', () => {
           if (bannerInput) {
+            bannerInput.value = '';
             bannerInput.click();
           } else {
             announce('Não foi possível abrir o seletor de arquivos.');
@@ -943,6 +947,12 @@
           if (!file) return;
           if (file.type && !file.type.startsWith('image/')) {
             announce('Selecione uma imagem válida para o banner.');
+            bannerInput.value = '';
+            return;
+          }
+
+          if (file.size > 1000000) {
+            announce('O arquivo é muito grande. O limite é 1000KB.');
             bannerInput.value = '';
             return;
           }
