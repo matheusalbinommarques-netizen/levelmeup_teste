@@ -151,6 +151,25 @@
     }
     /* quando ativo, estrela dourada */
     .fav-only-btn[aria-pressed="true"] i{ color:#f5c518; }
+    .dev-tools-btn{
+      margin-left:8px;
+      border:1px dashed rgba(255,255,255,0.4);
+      background:transparent;
+      color:#fff;
+      border-radius:6px;
+      padding:6px 10px;
+      font-size:12px;
+      font-weight:600;
+      letter-spacing:0.04em;
+      text-transform:uppercase;
+      cursor:pointer;
+    }
+    body.dark-mode .dev-tools-btn{
+      color: var(--color-text-dark);
+      border-color: rgba(255,255,255,0.35);
+      background: rgba(0,0,0,0.25);
+    }
+    .dev-tools-btn:focus-visible{ outline-color: var(--color-accent); }
     .user-greeting{ font-size:14px; white-space:nowrap; }
     .level-progress{ display:flex; align-items:center; gap:8px; }
     .progress-info{ font-size:14px; font-weight:600; }
@@ -160,6 +179,23 @@
     .xp-button{ background:var(--color-secondary); color:#111; border:0; border-radius:4px; padding:8px 12px; font-size:14px; font-weight:600; cursor:pointer; }
     .xp-button:hover{ filter:brightness(1.05); }
     .xp-button:active{ transform: translateY(1px); }
+    .xp-boost-btn{
+      background:transparent;
+      color:#fff;
+      border:1px dashed rgba(255,255,255,0.6);
+      border-radius:4px;
+      padding:6px 10px;
+      font-size:12px;
+      font-weight:600;
+      letter-spacing:0.03em;
+      cursor:pointer;
+    }
+    .xp-boost-btn:focus-visible{ outline-color: var(--color-accent); }
+    body.dark-mode .xp-boost-btn{
+      color: var(--color-text-dark);
+      border-color: rgba(255,255,255,0.35);
+      background: rgba(0,0,0,0.25);
+    }
     .toggle-theme-btn{ background:transparent; color:#fff; border:2px solid #fff; border-radius:6px; padding:6px 10px; cursor:pointer; }
     .toggle-theme-btn:hover{ background:#fff; color:var(--color-primary); }
     body.dark-mode .toggle-theme-btn{ color:#fff; border-color:#fff; }
@@ -330,6 +366,8 @@
             <i class="fa-regular fa-star" aria-hidden="true"></i>
             <span class="sr-only">Apenas favoritos</span>
           </button>
+          <button id="devToolsBtn" class="dev-tools-btn hit-target" type="button"
+                  aria-pressed="false" aria-label="Alternar modo desenvolvedor">Modo Dev: Desligado</button>
         </search>
       </div>
 
@@ -343,7 +381,8 @@
           </div>
         </div>
 
-        <button class="xp-button hit-target" id="xpBtn" type="button" aria-describedby="xpLive">+10 XP</button>
+        <button class="xp-boost-btn hit-target" id="devXpToggle" type="button" hidden aria-pressed="false" aria-label="Alternar botão de XP">XP Boost: Desligado</button>
+        <button class="xp-button hit-target" id="xpBtn" type="button" aria-describedby="xpLive" hidden>+10 XP</button>
         <button class="toggle-theme-btn hit-target" id="themeToggle" type="button" aria-label="Alternar tema">
           <i class="fas fa-adjust" aria-hidden="true"></i>
         </button>
@@ -648,6 +687,8 @@
   const K_THEME = 'lmup_theme';
   const K_FAVS  = 'lmup_favs_v1';
   const K_FAV_ONLY = 'lmup_fav_only';
+  const K_DEV_TOOLS = 'lmup_devtools';
+  const K_DEV_XP = 'lmup_dev_xp';
 
   // helpers primeiro
   const safeGet = (k, fb=null)=>{ try{ const v=localStorage.getItem(k); return v??fb; }catch{ return fb; } };
@@ -674,6 +715,8 @@
   const closeModalBtn= document.getElementById('closeModalBtn');
   const newLevelValue= document.getElementById('newLevelValue');
   const searchStatus = document.getElementById('searchStatus');
+  const devXpToggle  = document.getElementById('devXpToggle');
+  const devToolsBtn  = document.getElementById('devToolsBtn');
 
   function getDisplayName(){
     return (safeGet(K_NAME, '') || '').trim();
@@ -696,6 +739,19 @@
       rehydrateFavsFromStorage();
       const q = document.getElementById('siteSearchInput')?.value || '';
       window.applyFilter?.(q);
+    }
+    if (e.key === K_DEV_TOOLS) {
+      devToolsOn = e.newValue === '1';
+      if (!devToolsOn) {
+        xpBoostOn = false;
+      } else {
+        xpBoostOn = safeGet(K_DEV_XP, '0') === '1';
+      }
+      syncDevControlsUI();
+    }
+    if (e.key === K_DEV_XP) {
+      xpBoostOn = devToolsOn && e.newValue === '1';
+      syncDevControlsUI();
     }
   });
 
@@ -749,6 +805,51 @@
     progressBar.style.width = pct + '%';
   }
   let { level, xp } = loadProgress(); updateProgressUI(level, xp);
+
+  /* Dev tools: XP boost */
+  let devToolsOn = safeGet(K_DEV_TOOLS, '0') === '1';
+  let xpBoostOn = devToolsOn && safeGet(K_DEV_XP, '0') === '1';
+  function syncDevControlsUI(){
+    document.body.classList.toggle('dev-tools', devToolsOn);
+    const boostActive = devToolsOn && xpBoostOn;
+    if(devToolsBtn){
+      devToolsBtn.setAttribute('aria-pressed', String(devToolsOn));
+      devToolsBtn.textContent = devToolsOn ? 'Modo Dev: Ligado' : 'Modo Dev: Desligado';
+    }
+    if(devXpToggle){
+      devXpToggle.hidden = !devToolsOn;
+      devXpToggle.setAttribute('aria-pressed', String(boostActive));
+      devXpToggle.textContent = boostActive ? 'XP Boost: Ligado' : 'XP Boost: Desligado';
+      if(devToolsOn){ devXpToggle.removeAttribute('aria-hidden'); }
+      else{ devXpToggle.setAttribute('aria-hidden','true'); }
+    }
+    if(xpBtn){
+      xpBtn.hidden = !boostActive;
+      if(boostActive){ xpBtn.removeAttribute('aria-hidden'); }
+      else{ xpBtn.setAttribute('aria-hidden','true'); }
+    }
+  }
+  syncDevControlsUI();
+
+  function toggleDevTools(){
+    devToolsOn = !devToolsOn;
+    safeSet(K_DEV_TOOLS, devToolsOn ? '1' : '0');
+    if(!devToolsOn){
+      xpBoostOn = false;
+      safeSet(K_DEV_XP, '0');
+    }else{
+      xpBoostOn = safeGet(K_DEV_XP, '0') === '1';
+    }
+    syncDevControlsUI();
+  }
+
+  devToolsBtn?.addEventListener('click', toggleDevTools);
+  devXpToggle?.addEventListener('click', ()=>{
+    if(!devToolsOn) return;
+    xpBoostOn = !xpBoostOn;
+    safeSet(K_DEV_XP, (xpBoostOn && devToolsOn) ? '1' : '0');
+    syncDevControlsUI();
+  });
 
   const announce = msg => { if (msg) { document.getElementById('xpLive').textContent = msg; } };
 
