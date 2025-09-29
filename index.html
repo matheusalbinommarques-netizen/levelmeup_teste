@@ -792,7 +792,7 @@
   }
   syncDevXpUI();
   if(window?.console?.info){
-    console.info('Modo desenvolvedor: use Ctrl+Shift+D (ou ⌘+Shift+D) para alternar a visibilidade do botão de XP.');
+    console.info('Modo desenvolvedor: use F8 para alternar a visibilidade do botão de XP.');
   }
 
   function toggleDevTools(){
@@ -813,8 +813,7 @@
   });
 
   document.addEventListener('keydown', (e)=>{
-    if(!(e.key && (e.ctrlKey || e.metaKey) && e.shiftKey)) return;
-    if(e.key.toLowerCase() !== 'd') return;
+    if(e.key !== 'F8') return;
     e.preventDefault();
     toggleDevTools();
   });
