@@ -156,15 +156,15 @@
       position:absolute;
       right:16px;
       bottom:16px;
-      border:1px solid rgba(255,255,255,0.6);
-      background:rgba(255,255,255,0.2);
-      color:#fff;
+      border:1px solid rgba(0,0,0,0.08);
+      background:rgba(255,255,255,0.92);
+      color:#1d1d1f;
       padding:6px 12px;
       border-radius:999px;
       backdrop-filter: blur(6px);
       font-weight:600;
     }
-    .banner-btn:hover{ background:rgba(255,255,255,0.28); }
+    .banner-btn:hover{ background:rgba(255,255,255,0.96); }
 
     .profile-core{
       display:flex;
@@ -342,8 +342,12 @@
     .dark-mode .btn{ background:#1f2429; border-color:var(--border-dark); }
     .dark-mode .btn-primary{ color:#111; }
     .dark-mode .empty-state{ background:rgba(29,33,37,0.8); border-color:var(--border-dark); }
-    .dark-mode .banner{ border-color:var(--border-dark); }
-    .dark-mode .banner-btn{ color:var(--text-dark); }
+    .dark-mode .banner{ border-color:var(--border-dark-contrast); }
+    .dark-mode .banner-btn{
+      border-color:rgba(255,255,255,0.24);
+      background:rgba(20,26,32,0.68);
+      color:var(--text-dark);
+    }
 
     @media (max-width: 980px){
       .grid{ grid-template-columns: 1fr; }
@@ -364,7 +368,7 @@
     <div class="wrap">
       <section class="card profile-hero" aria-labelledby="profileTitle">
         <div class="banner" role="img" aria-label="Banner personalizado do perfil">
-          <input id="bannerFileInput" type="file" accept="image/*" hidden aria-hidden="true">
+          <input id="bannerFileInput" type="file" accept="image/png, image/jpeg, image/webp" hidden aria-hidden="true">
           <button id="bannerEditBtn" class="btn banner-btn" type="button">Editar banner</button>
         </div>
         <div class="profile-core">
@@ -525,11 +529,12 @@
   (() => {
     const K_NAME   = 'lmup_name';
     const K_AVATAR = 'lmup_avatar_v1';
-    const K_BANNER = 'lmup_banner_url';
+    const K_BANNER = 'lmu.profile.banner';
     const K_THEME  = 'lmup_theme';
     const K_LEVEL  = 'lmup_level';
     const K_XP     = 'lmup_xp';
     const K_EVENTS = 'lmup_xp_events_v1';
+    const BANNER_ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 
     const safeGet = (k, fb = '') => { try { const v = localStorage.getItem(k); return v ?? fb; } catch { return fb; } };
     const safeSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
@@ -648,8 +653,10 @@
       if (!banner) return;
       const stored = (safeGet(K_BANNER, '') || '').trim();
       if (stored) {
-        const sanitized = stored.replace(/"/g, '%22');
-        banner.style.setProperty('--banner-photo', `url("${sanitized}")`);
+        const sanitized = stored
+          .replace(/'/g, '%27')
+          .replace(/"/g, '%22');
+        banner.style.setProperty('--banner-photo', `url('${sanitized}')`);
         banner.dataset.hasImage = 'true';
         banner.setAttribute('aria-label', 'Banner personalizado do perfil com imagem enviada.');
       } else {
@@ -945,7 +952,11 @@
         bannerInput.addEventListener('change', () => {
           const [file] = bannerInput.files || [];
           if (!file) return;
-          if (file.type && !file.type.startsWith('image/')) {
+
+          const matchesType = file.type
+            ? BANNER_ALLOWED_TYPES.includes(file.type)
+            : /\.(png|jpe?g|webp)$/i.test(file.name || '');
+          if (!matchesType) {
             announce('Selecione uma imagem válida para o banner.');
             bannerInput.value = '';
             return;
