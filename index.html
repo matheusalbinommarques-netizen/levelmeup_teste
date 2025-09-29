@@ -151,6 +151,18 @@
     }
     /* quando ativo, estrela dourada */
     .fav-only-btn[aria-pressed="true"] i{ color:#f5c518; }
+    .search-bar .xp-button{
+      margin-left:8px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      font-size:13px;
+      padding:6px 10px;
+    }
+    .search-bar .xp-button i{ font-size:14px; }
+    body.dark-mode .search-bar .xp-button{
+      color:#111;
+    }
     .user-greeting{ font-size:14px; white-space:nowrap; }
     .level-progress{ display:flex; align-items:center; gap:8px; }
     .progress-info{ font-size:14px; font-weight:600; }
@@ -347,6 +359,12 @@
             <i class="fa-regular fa-star" aria-hidden="true"></i>
             <span class="sr-only">Apenas favoritos</span>
           </button>
+          <!-- Botão de desenvolvedor para XP -->
+          <button class="xp-button hit-target" id="xpBtn" type="button" aria-describedby="xpLive" hidden
+                  title="Adicionar 10 XP (modo desenvolvedor)">
+            <i class="fa-solid fa-code" aria-hidden="true"></i>
+            <span>+10 XP</span>
+          </button>
         </search>
       </div>
 
@@ -361,7 +379,6 @@
         </div>
 
         <button class="dev-toggle-btn hit-target" id="devXpToggle" type="button" hidden aria-pressed="false" aria-label="Alternar botão de XP">XP Boost: Desligado</button>
-        <button class="xp-button hit-target" id="xpBtn" type="button" aria-describedby="xpLive" hidden>+10 XP</button>
         <button class="toggle-theme-btn hit-target" id="themeToggle" type="button" aria-label="Alternar tema">
           <i class="fas fa-adjust" aria-hidden="true"></i>
         </button>
