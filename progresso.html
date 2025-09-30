@@ -101,15 +101,64 @@
     .tag{ display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; border:1px solid var(--border); background:var(--soft); font-size:12px; }
 
     /* Perfil (hero) */
-    .profile-hero{ display:flex; align-items:center; gap:16px; }
+    .profile-hero{
+      position:relative;
+      display:grid;
+      grid-template-columns: auto 1fr;
+      gap:16px;
+      align-items:end;
+    }
+    .profile-hero > *:not(.profile-banner){ position:relative; z-index:1; }
+    .profile-banner{
+      grid-column:1 / -1;
+      grid-row:1 / -1;
+      position:absolute;
+      inset:0;
+      border-radius: var(--radius);
+      overflow:hidden;
+      z-index:0;
+    }
+    .profile-hero .avatar{ align-self:end; }
     .avatar{
       width:72px; height:72px; border-radius:50%; background:#ddd; display:grid; place-items:center; font-weight:800; font-size:26px;
       border:3px solid #fff; box-shadow: var(--shadow); overflow:hidden;
     }
     .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
-    .profile-info{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+    .profile-info{
+      grid-column:2;
+      display:flex;
+      flex-direction:row;
+      align-items:center;
+      gap:12px;
+    }
+    .profile-badges{ display:flex; flex-wrap:wrap; gap:8px; margin-left:auto; }
     .profile-name{ font-size:20px; font-weight:800; margin-right:6px; }
-    .profile-actions{ margin-left:auto; display:flex; gap:8px; }
+    .profile-stats{
+      grid-column:2;
+      justify-self:end;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    #editBannerBtn{ justify-self:end; align-self:flex-end; }
+    .profile-actions{
+      grid-column:2;
+      margin-left:0;
+      display:flex;
+      gap:8px;
+      justify-self:end;
+      flex-wrap:wrap;
+    }
+    @media (max-width: 560px){
+      .profile-hero{ grid-template-columns: 1fr; align-items:start; }
+      .profile-hero .avatar{ grid-row:auto; }
+      .profile-info{ grid-column:1; flex-direction:column; align-items:flex-start; gap:8px; }
+      .profile-badges{ margin-left:0; }
+      .profile-stats{ grid-column:1; justify-self:stretch; align-items:flex-start; }
+      .profile-actions{ grid-column:1; justify-self:stretch; }
+      #editBannerBtn{ justify-self:start; align-self:flex-start; }
+    }
     .btn{ border:1px solid var(--border); background:var(--soft); padding:6px 10px; border-radius:8px; }
     .btn:focus-visible{ outline:3px solid var(--focus); }
 
