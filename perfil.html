@@ -443,6 +443,26 @@
         justify-content: flex-start;
       }
     }
+
+    /* Posiciona relativo ao .profile-hero */
+    .profile-hero{ position: relative; }
+
+    .banner-btn,
+    .dark-mode .banner-btn{
+      position: absolute;
+      right: 16px;
+      /* 160px = altura do banner em desktop */
+      top: calc(160px + 12px);
+    }
+
+    /* mobile: banner é menor → ajusta top */
+    @media (max-width: 560px){
+      .banner-btn,
+      .dark-mode .banner-btn{
+        /* 140px = altura do banner no mobile */
+        top: calc(140px + 8px);
+      }
+    }
   </style>
 </head>
 <body>
@@ -452,9 +472,9 @@
       <section class="card profile-hero" aria-labelledby="profileNameDisplay">
         <div class="banner" role="img" aria-label="Banner personalizado do perfil">
           <input id="bannerFileInput" class="sr-only" type="file" accept="image/png, image/jpeg, image/webp">
-          <button id="bannerEditBtn" class="btn banner-btn" type="button">Editar banner</button>
           <div id="bannerToast" role="status" aria-live="polite"></div>
         </div>
+        <button id="bannerEditBtn" class="btn banner-btn" type="button">Editar banner</button>
         <div class="profile-core">
           <div class="avatar" id="profileAvatar" aria-hidden="true">
             <span id="profileAvatarInitial">?</span>
