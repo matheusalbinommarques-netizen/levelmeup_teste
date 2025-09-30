@@ -538,21 +538,6 @@
       box-shadow:0 10px 24px rgba(0,0,0,.35);
     }
 
-    /* Botões ao lado do nome (participam do fluxo) */
-    .profile-core .hero-actions {
-      position: static;
-      margin-left: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    /* Quando o banner button estiver no grupo, não é absoluto */
-    .hero-actions #bannerEditBtn {
-      position: static !important;
-      inset: auto !important;
-    }
-
     /* (Já existente) Nome + badges alinham por baseline em telas maiores */
     @media (min-width: 720px) {
       .profile-info {
@@ -570,6 +555,25 @@
         margin-left: 0;
         justify-content: flex-start;
       }
+    }
+
+    /* Centraliza avatar + nome/pílulas + ações */
+    .profile-core{
+      display:flex;
+      align-items:center !important;
+      gap:16px;
+    }
+    /* Ações vão para a direita e viram coluna em telas pequenas (se quiser) */
+    .profile-core .hero-actions{
+      margin-left:auto;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    /* Mata qualquer posicionamento absoluto legado do banner */
+    .profile-hero .hero-actions, .profile-hero .banner-btn{
+      position:static !important;
+      inset:auto !important;
     }
   </style>
 </head>
