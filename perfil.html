@@ -568,6 +568,7 @@
       <section class="card profile-hero" aria-labelledby="profileNameDisplay">
         <div class="banner" role="img" aria-label="Banner personalizado do perfil">
           <input id="bannerFileInput" class="sr-only" type="file" accept="image/png, image/jpeg, image/webp">
+          <input id="avatarFileInput" class="sr-only" type="file" accept="image/png, image/jpeg, image/webp">
           <div id="bannerToast" role="status" aria-live="polite"></div>
         </div>
         <div class="hero-actions" role="group" aria-label="Ações rápidas do perfil">
@@ -1239,15 +1240,76 @@
         nameDisplay.__lmu_inline_bound = true;
       }
 
-      // Botão "Alterar avatar": rola e foca o campo do formulário existente
+      // Listener de clique para abrir o file picker e Listener de upload do avatar
       const quickAvatar = $('#quickAvatarBtn');
       if (quickAvatar && !quickAvatar.__lmu_bound) {
+        const avatarInput = $('#avatarFileInput');
+        // Trecho que substitui o antigo (que só rolava a página)
         quickAvatar.addEventListener('click', () => {
-          const input = $('#profileAvatarInput');
-          input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          input?.focus();
+          if (avatarInput) {
+            avatarInput.value = '';
+            avatarInput.click();        // abre o file picker
+          } else {
+            announce('Não foi possível abrir o seletor de arquivos.');
+          }
         });
         quickAvatar.__lmu_bound = true;
+      }
+
+      // Listener de upload do avatar (parecido com o do banner)
+      const AVATAR_MAX_SIZE = 2000000; // ~2MB (evita estourar o localStorage)
+      const AVATAR_ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+      const avatarInput = $('#avatarFileInput'); // Re-obter o input, se necessário
+
+      if (avatarInput && !avatarInput.__lmu_bound) {
+        avatarInput.addEventListener('change', () => {
+          const [file] = avatarInput.files || [];
+          if (!file) return;
+
+          const okTipo = file.type
+            ? AVATAR_ALLOWED_TYPES.includes(file.type)
+            : /\.(png|jpe?g|webp)$/i.test(file.name || '');
+          if (!okTipo) {
+            announce('Selecione uma imagem PNG, JPG ou WEBP.');
+            avatarInput.value = '';
+            return;
+          }
+          if (file.size > AVATAR_MAX_SIZE) {
+            announce('O arquivo é muito grande (máx. 2MB).');
+            avatarInput.value = '';
+            return;
+          }
+          if (typeof FileReader === 'undefined') {
+            announce('Seu navegador não suporta upload de imagem.');
+            avatarInput.value = '';
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.addEventListener('load', () => {
+            const { result } = reader;
+            if (typeof result === 'string' && result.startsWith('data:')) {
+              safeSet(K_AVATAR, result);   // salva o data URL
+              renderProfile();             // atualiza o avatar na UI
+              announce('Avatar atualizado.');
+            } else {
+              announce('Não foi possível atualizar o avatar.');
+            }
+            avatarInput.value = '';
+          });
+          reader.addEventListener('error', () => {
+            announce('Falha ao ler o arquivo selecionado.');
+            avatarInput.value = '';
+          });
+
+          try {
+            reader.readAsDataURL(file);
+          } catch {
+            announce('Não foi possível processar o arquivo do avatar.');
+            avatarInput.value = '';
+          }
+        });
+        avatarInput.__lmu_bound = true;
       }
 
       const bannerInput = $('#bannerFileInput');
