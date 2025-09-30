@@ -203,8 +203,6 @@
       position:absolute;
       top:16px;
       right:16px;
-      bottom:auto;
-      left:auto;
       border:1px solid rgba(11,48,66,0.28);
       background:linear-gradient(135deg, rgba(255,255,255,0.97), rgba(221,232,255,0.9));
       color:#0b2533;
@@ -259,7 +257,6 @@
       border:1px solid rgba(139,92,246,0.32);
       box-shadow:0 2px 6px rgba(15,23,42,0.08);
     }
-    .profile-subtitle{ margin:0; color: var(--text-subtle); font-size:15px; }
     .profile-badges{ list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:12px; }
     .profile-badges li{ display:flex; align-items:center; gap:6px; }
     .profile-badges strong{ font-size:18px; }
@@ -389,7 +386,6 @@
     .dark-mode .stats-list li{ background:var(--card-dark); border:1px solid var(--border-dark-contrast); box-shadow: var(--shadow-dark); }
     .dark-mode .pill{ background:rgba(139,92,246,0.22); color:#f4ebff; border-color:rgba(139,92,246,0.5); box-shadow:0 4px 14px rgba(0,0,0,0.35); }
     .dark-mode .profile-name{ color: var(--text-dark); }
-    .dark-mode .profile-subtitle,
     .dark-mode .activity-note,
     .dark-mode .activity-meta,
     .dark-mode .friend-meta,
@@ -405,8 +401,6 @@
     .dark-mode .banner-btn{
       top:16px;
       right:16px;
-      bottom:auto;
-      left:auto;
       border-color:rgba(255,255,255,0.24);
       background:rgba(20,26,32,0.68);
       color:var(--text-dark);
@@ -433,7 +427,7 @@
     <div class="wrap">
       <section class="card profile-hero" aria-labelledby="profileTitle">
         <div class="banner" role="img" aria-label="Banner personalizado do perfil">
-          <input id="bannerFileInput" type="file" accept="image/png, image/jpeg, image/webp" hidden aria-hidden="true">
+          <input id="bannerFileInput" class="sr-only" type="file" accept="image/png, image/jpeg, image/webp">
           <button id="bannerEditBtn" class="btn banner-btn" type="button">Editar banner</button>
           <div id="bannerToast" role="status" aria-live="polite"></div>
         </div>
@@ -445,12 +439,12 @@
             <div class="profile-name" id="profileNameDisplay">Visitante</div>
             <ul class="profile-badges" aria-label="Resumo rápido do perfil">
               <li class="pill">
-                <span class="badge-label">Nível</span>
                 <strong id="profileLevelBadge">1</strong>
+                <span class="badge-label">Nível</span>
               </li>
               <li class="pill">
-                <span class="badge-label">XP total</span>
                 <strong id="profileTotalBadge">0</strong>
+                <span class="badge-label">XP total</span>
               </li>
               <li class="pill">
                 <strong id="profileAreasBadge">0</strong>
@@ -783,7 +777,7 @@
       const profileLevelBadge = $('#profileLevelBadge');
       if (profileLevelBadge) profileLevelBadge.textContent = String(level);
       const profileTotalBadge = $('#profileTotalBadge');
-      if (profileTotalBadge) profileTotalBadge.textContent = `${totalXp} XP`;
+      if (profileTotalBadge) profileTotalBadge.textContent = String(totalXp);
       const profileAreasBadge = $('#profileAreasBadge');
       if (profileAreasBadge) profileAreasBadge.textContent = String(areas.size);
 
