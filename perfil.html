@@ -501,6 +501,40 @@
     @media (max-width: 560px){
       .hero-actions{ right:12px; bottom:12px; }
     }
+
+    .profile-info{ position: relative; }
+    .profile-inline-name-editor{
+      position:absolute;
+      top:-6px;
+      left:0;
+      width:min(360px, 100%);
+      padding:10px 16px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;
+      color:inherit;
+      font-size:24px;
+      font-weight:700;
+      line-height:1.2;
+      box-shadow:var(--shadow);
+      display:none;
+      z-index:5;
+    }
+    .profile-inline-name-editor::placeholder{ color:var(--text-subtle); font-weight:400; }
+    .profile-info.is-inline-editing #profileNameDisplay{
+      opacity:0;
+      pointer-events:none;
+    }
+    .profile-info.is-inline-editing .profile-inline-name-editor{
+      display:block;
+    }
+    .dark-mode .profile-inline-name-editor{
+      background:var(--card-dark);
+      border-color:var(--border-dark-contrast);
+      color:var(--text-dark);
+      box-shadow:var(--shadow-dark);
+    }
+    .dark-mode .profile-inline-name-editor::placeholder{ color:rgba(226,232,240,0.64); }
   </style>
 </head>
 <body>
@@ -513,7 +547,7 @@
           <div id="bannerToast" role="status" aria-live="polite"></div>
         </div>
         <div class="hero-actions" role="group" aria-label="Ações rápidas do perfil">
-          <button id="quickNameBtn" class="btn hero-btn" type="button" aria-controls="profileNameInput">Alterar nome</button>
+          <button id="quickNameBtn" class="btn hero-btn" type="button" aria-controls="profileNameInlineInput">Alterar nome</button>
           <button id="quickAvatarBtn" class="btn hero-btn" type="button" aria-controls="profileAvatarInput">Alterar avatar</button>
 
           <button id="bannerEditBtn" class="btn banner-btn" type="button">Editar banner</button>
@@ -524,6 +558,13 @@
           </div>
           <div class="profile-info">
             <div class="profile-name" id="profileNameDisplay">Visitante</div>
+            <input id="profileNameInlineInput"
+                   class="profile-inline-name-editor"
+                   type="text"
+                   maxlength="40"
+                   autocomplete="name"
+                   aria-label="Editar nome exibido"
+                   placeholder="Digite seu nome exibido">
             <ul class="profile-badges" aria-label="Resumo rápido do perfil">
               <li class="pill">
                 <strong id="profileLevelBadge">1</strong>
@@ -871,6 +912,12 @@
       const nameInput = $('#profileNameInput');
       if (nameInput && document.activeElement !== nameInput) nameInput.value = name;
 
+      const inlineNameInput = $('#profileNameInlineInput');
+      const isInlineEditing = inlineNameInput?.closest('.profile-info')?.classList.contains('is-inline-editing');
+      if (inlineNameInput && !isInlineEditing && document.activeElement !== inlineNameInput) {
+        inlineNameInput.value = name;
+      }
+
       const avatarInput = $('#profileAvatarInput');
       if (avatarInput && document.activeElement !== avatarInput) avatarInput.value = avatar;
     };
@@ -1092,15 +1139,80 @@
         themeBtn.__lmu_bound = true;
       }
 
-      // Botão "Alterar nome": rola e foca o campo do formulário existente
+      const startInlineNameEdit = () => {
+        const container = $('.profile-info');
+        const display = $('#profileNameDisplay');
+        const input = $('#profileNameInlineInput');
+        if (!container || !display || !input) return;
+
+        if (container.classList.contains('is-inline-editing')) {
+          if (document.activeElement !== input) {
+            input.focus();
+            input.select();
+          }
+          return;
+        }
+
+        const storedName = (safeGet(K_NAME, '') || '').trim();
+        const fallbackName = (display.textContent || '').trim();
+        input.value = storedName || fallbackName || '';
+
+        container.classList.add('is-inline-editing');
+        display.setAttribute('aria-hidden', 'true');
+
+        let finished = false;
+        const cleanup = (shouldSave) => {
+          if (finished) return;
+          finished = true;
+          input.removeEventListener('keydown', handleKeydown);
+          input.removeEventListener('blur', handleBlur);
+          container.classList.remove('is-inline-editing');
+          display.removeAttribute('aria-hidden');
+
+          if (!shouldSave) {
+            renderProfile();
+            return;
+          }
+
+          const rawValue = (input.value || '').trim();
+          const finalValue = rawValue || 'Visitante';
+          safeSet(K_NAME, finalValue);
+          renderProfile();
+          announce('Nome atualizado com sucesso.');
+          window.dispatchEvent(new Event('lmu:name-changed'));
+          window.refreshNameOnTopbar?.();
+        };
+
+        const handleBlur = () => cleanup(true);
+        const handleKeydown = (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            cleanup(true);
+          } else if (event.key === 'Escape') {
+            event.preventDefault();
+            cleanup(false);
+          }
+        };
+
+        input.addEventListener('keydown', handleKeydown);
+        input.addEventListener('blur', handleBlur);
+
+        requestAnimationFrame(() => {
+          input.focus();
+          input.select();
+        });
+      };
+
       const quickName = $('#quickNameBtn');
       if (quickName && !quickName.__lmu_bound) {
-        quickName.addEventListener('click', () => {
-          const input = $('#profileNameInput');
-          input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          input?.focus();
-        });
+        quickName.addEventListener('click', startInlineNameEdit);
         quickName.__lmu_bound = true;
+      }
+
+      const nameDisplay = $('#profileNameDisplay');
+      if (nameDisplay && !nameDisplay.__lmu_inline_bound) {
+        nameDisplay.addEventListener('dblclick', startInlineNameEdit);
+        nameDisplay.__lmu_inline_bound = true;
       }
 
       // Botão "Alterar avatar": rola e foca o campo do formulário existente
