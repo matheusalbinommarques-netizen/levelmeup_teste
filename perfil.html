@@ -610,30 +610,9 @@
 
       <div class="grid">
         <div class="column main-column">
-          <section class="card stats-card" aria-labelledby="statsTitle">
-            <h2 id="statsTitle">Estatísticas &amp; progresso</h2>
-            <ul class="stats-list">
-              <li>
-                <h3>Progresso atual</h3>
-                <p id="statLevel">Nível 1</p>
-              </li>
-              <li>
-                <h3>Próximo marco</h3>
-                <p id="statNextLevel">Faltam 100 XP para o próximo nível.</p>
-              </li>
-              <li>
-                <h3>XP acumulado</h3>
-                <p id="statTotalXp">0 XP registrados.</p>
-              </li>
-              <li>
-                <h3>Áreas exploradas</h3>
-                <p id="statAreas">Nenhuma área registrada ainda.</p>
-              </li>
-              <li>
-                <h3>Streak de estudo</h3>
-                <p id="statStreak">Nenhum dia consecutivo ainda.</p>
-              </li>
-            </ul>
+          <section class="card xp-dashboard-card" aria-labelledby="xpDashTitle">
+            <h2 id="xpDashTitle">Dashboard de XP</h2>
+            <div id="xpChartContainer">Gráfico será renderizado aqui</div>
           </section>
 
           <section class="card activity-card" aria-labelledby="activityTitle">
@@ -675,38 +654,30 @@
         </div>
 
         <aside class="column side-column">
-          <section class="card settings-card" aria-labelledby="settingsTitle">
-            <h2 id="settingsTitle">Configurações do perfil</h2>
-            <form id="profileNameForm">
-              <fieldset>
-                <legend>Nome exibido</legend>
-                <input id="profileNameInput" class="input" maxlength="40" placeholder="Como você quer ser chamado?">
-                <p class="settings-help">Esse nome aparece na saudação da página inicial e em relatórios.</p>
-                <div class="settings-actions">
-                  <button class="btn-primary" type="submit">Salvar nome</button>
-                </div>
-              </fieldset>
-            </form>
-
-            <form id="profileAvatarForm">
-              <fieldset>
-                <legend>Avatar</legend>
-                <input id="profileAvatarInput" class="input" type="url" placeholder="Cole uma URL de imagem (PNG, JPG, SVG…)" inputmode="url">
-                <p class="settings-help">Use um link público ou deixe em branco para manter a inicial do seu nome.</p>
-                <div class="settings-actions">
-                  <button class="btn-primary" type="submit">Atualizar avatar</button>
-                  <button class="btn" type="button" id="profileAvatarReset">Remover avatar</button>
-                </div>
-              </fieldset>
-            </form>
-
-            <div class="theme-toggle" role="group" aria-labelledby="themeToggleLabel">
-              <div>
-                <strong id="themeToggleLabel">Tema do aplicativo</strong>
-                <p class="settings-help" id="themeToggleDesc">Escolha entre modo claro ou escuro. A preferência vale para todas as páginas.</p>
-              </div>
-              <button class="btn" id="profileThemeToggle" type="button" aria-pressed="false" aria-describedby="themeToggleDesc">Ativar modo escuro</button>
-            </div>
+          <section class="card progress-card" aria-labelledby="progressTitle">
+            <h2 id="progressTitle">Progresso</h2>
+            <ul class="stats-list">
+              <li>
+                <h3>Progresso atual</h3>
+                <p id="statLevel">Nível 1</p>
+              </li>
+              <li>
+                <h3>Próximo marco</h3>
+                <p id="statNextLevel">Faltam 100 XP para o próximo nível.</p>
+              </li>
+              <li>
+                <h3>XP acumulado</h3>
+                <p id="statTotalXp">0 XP registrados.</p>
+              </li>
+              <li>
+                <h3>Áreas exploradas</h3>
+                <p id="statAreas">Nenhuma área registrada ainda.</p>
+              </li>
+              <li>
+                <h3>Streak de estudo</h3>
+                <p id="statStreak">Nenhum dia consecutivo ainda.</p>
+              </li>
+            </ul>
           </section>
 
           <section class="card" aria-labelledby="tipsTitle">
