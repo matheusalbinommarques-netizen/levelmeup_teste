@@ -336,6 +336,20 @@
     body:not(.dark-mode) .subarea-card{
       border:2px solid #000000;
     }
+    .subarea-card{
+      border:1px solid var(--border, var(--color-border));
+      background:var(--card, #fff);
+      border-radius:var(--radius, 6px);
+    }
+
+    body:not(.dark-mode) .subarea-card{
+      border:1px solid var(--border, var(--color-border));
+    }
+
+    body.dark-mode .subarea-card{
+      border:1px solid var(--border-dark-contrast, var(--color-border-dark-contrast));
+      background:var(--card-dark, var(--color-card-bg-dark));
+    }
   </style>
 </head>
 <body>

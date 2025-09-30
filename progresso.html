@@ -416,6 +416,26 @@
     body:not(.dark-mode) .subjects-grid article.subject-tile{
       border:2px solid #000000;
     }
+    h3#quests-h,
+    h3#mastery-h,
+    h3#badges-h{
+      text-align:center;
+    }
+
+    .subject-tile{
+      border:1px solid var(--border);
+      background:var(--card);
+      border-radius:var(--radius);
+    }
+
+    body:not(.dark-mode) .subjects-grid article.subject-tile{
+      border:1px solid var(--border);
+    }
+
+    body.dark-mode .subject-tile{
+      border-color:var(--border-dark-contrast);
+      background:var(--card-dark);
+    }
   </style>
 </head>
 <body>
