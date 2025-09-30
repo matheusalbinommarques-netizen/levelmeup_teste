@@ -223,7 +223,7 @@
       gap:16px;
       padding:0 24px 24px;
       margin-top:0;
-      flex-wrap:wrap;
+      flex-wrap:nowrap;
     }
     .avatar{
       width:108px;
@@ -410,6 +410,7 @@
       .avatar{ width:92px; height:92px; border-radius:20px; }
     }
     @media (max-width: 720px){
+      .profile-core{ flex-wrap:wrap; }
       .profile-badges{ margin-left:0; justify-content:flex-start; width:100%; }
     }
     @media (max-width: 560px){
