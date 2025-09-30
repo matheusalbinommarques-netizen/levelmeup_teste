@@ -620,6 +620,66 @@
       position:static !important;
       inset:auto !important;
     }
+
+    /* === Layout atualizado para ações rápidas do perfil === */
+    .profile-core{
+      display:flex;
+      align-items:flex-start;
+      gap:18px;
+      padding:0 24px 24px;
+      margin-top:0;
+      position:relative;
+      flex-wrap:wrap;
+    }
+
+    .profile-core .avatar{
+      flex:0 0 auto;
+    }
+
+    .profile-core .profile-info{
+      flex:1 1 320px;
+      min-width:0;
+    }
+
+    .profile-core .hero-actions{
+      position:static;
+      margin-left:auto;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:10px;
+      z-index:auto;
+    }
+
+    .profile-core .hero-actions .btn{
+      width:100%;
+      max-width:240px;
+    }
+
+    @media (max-width: 980px){
+      .profile-core{
+        padding:0 16px 20px;
+      }
+    }
+
+    @media (max-width: 720px){
+      .profile-core{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:16px;
+        padding:0 16px 24px;
+      }
+
+      .profile-core .hero-actions{
+        width:100%;
+        margin-left:0;
+        align-items:stretch;
+      }
+
+      .profile-core .hero-actions .btn{
+        max-width:none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -637,11 +697,6 @@
           <input id="bannerFileInput" class="sr-only" type="file" accept="image/png, image/jpeg, image/webp">
           <input id="avatarFileInput" class="sr-only" type="file" accept="image/png, image/jpeg, image/webp">
           <div id="bannerToast" role="status" aria-live="polite"></div>
-        </div>
-        <div class="hero-actions" role="group" aria-label="Ações rápidas do perfil">
-          <button id="quickNameBtn"   class="btn hero-btn" type="button">Alterar nome</button>
-          <button id="quickAvatarBtn" class="btn hero-btn" type="button">Alterar avatar</button>
-          <button id="bannerEditBtn"  class="btn hero-btn banner-btn" type="button">Alterar banner</button>
         </div>
         <div class="profile-core">
           <div class="avatar" id="profileAvatar" aria-hidden="true">
@@ -670,6 +725,11 @@
                 <span class="badge-label">Áreas</span>
               </li>
             </ul>
+          </div>
+          <div class="hero-actions" role="group" aria-label="Ações rápidas do perfil">
+            <button id="quickNameBtn"   class="btn hero-btn" type="button">Alterar nome</button>
+            <button id="quickAvatarBtn" class="btn hero-btn" type="button">Alterar avatar</button>
+            <button id="bannerEditBtn"  class="btn hero-btn banner-btn" type="button">Alterar banner</button>
           </div>
         </div>
       </section>
