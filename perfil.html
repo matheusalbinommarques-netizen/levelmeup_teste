@@ -423,6 +423,20 @@
       .stats-list{ grid-template-columns:1fr; }
       .banner{ height:140px; }
     }
+    /* Desktop: badges ao lado do nome e “seguem” o comprimento do nome */
+    @media (min-width: 720px){
+      .profile-info{
+        flex-direction: row;   /* sai da coluna */
+        align-items: baseline; /* alinha pelo baseline do texto do nome */
+        flex-wrap: wrap;       /* se o nome for longo, badges quebram abaixo do nome */
+        gap: 6px 12px;         /* espaço entre nome↔badges e entre linhas */
+      }
+      .profile-name{ margin-right: 8px; }
+      .profile-badges{
+        margin-left: 0;        /* cancela o “empurrão” para a direita */
+        justify-content: flex-start;
+      }
+    }
   </style>
 </head>
 <body>
