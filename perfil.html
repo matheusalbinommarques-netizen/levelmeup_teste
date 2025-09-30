@@ -587,6 +587,39 @@
         --text-muted:  hsl(215 20% 72%);
       }
     }
+
+    /* ===== Fix hero action buttons (ganha de .dark-mode .btn) ===== */
+    .hero-actions{
+      position:absolute; right:16px; bottom:16px;
+      display:flex; flex-direction:column; gap:8px; z-index:4;
+    }
+    /* visual base dos botões do herói */
+    .btn.hero-btn{
+      border:1px solid rgba(11,48,66,.28);
+      background:linear-gradient(135deg, rgba(255,255,255,.97), rgba(221,232,255,.9));
+      color:#0b2533;
+      padding:6px 14px; border-radius:999px;
+      backdrop-filter:blur(8px); font-weight:600;
+      text-shadow:0 1px 2px rgba(255,255,255,.65);
+      box-shadow:0 6px 16px rgba(15,23,42,.15);
+    }
+    .btn.hero-btn:hover,.btn.hero-btn:focus-visible{
+      background:linear-gradient(135deg,#fff,rgba(214,227,255,.98));
+      box-shadow:0 10px 22px rgba(15,23,42,.22);
+    }
+    /* dark-mode: MAIS específico que .dark-mode .btn */
+    .dark-mode .btn.hero-btn{
+      background:linear-gradient(135deg, rgba(35,41,49,.95), rgba(51,59,72,.92));
+      color:var(--text-dark);
+      border-color:rgba(255,255,255,.18);
+      text-shadow:none;
+      box-shadow:0 10px 24px rgba(0,0,0,.35);
+    }
+    /* quando o botão de banner estiver dentro do grupo, ele se comporta como os demais */
+    .hero-actions #bannerEditBtn{
+      position:static !important;
+      inset:auto !important;
+    }
   </style>
 </head>
 <body>
@@ -606,10 +639,9 @@
           <div id="bannerToast" role="status" aria-live="polite"></div>
         </div>
         <div class="hero-actions" role="group" aria-label="Ações rápidas do perfil">
-          <button id="quickNameBtn" class="btn hero-btn" type="button" aria-controls="profileNameInlineInput">Alterar nome</button>
-          <button id="quickAvatarBtn" class="btn hero-btn" type="button" aria-controls="profileAvatarInput">Alterar avatar</button>
-
-          <button id="bannerEditBtn" class="btn hero-btn" type="button">Alterar banner</button>
+          <button id="quickNameBtn"   class="btn hero-btn" type="button">Alterar nome</button>
+          <button id="quickAvatarBtn" class="btn hero-btn" type="button">Alterar avatar</button>
+          <button id="bannerEditBtn"  class="btn hero-btn banner-btn" type="button">Alterar banner</button>
         </div>
         <div class="profile-core">
           <div class="avatar" id="profileAvatar" aria-hidden="true">
