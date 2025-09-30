@@ -121,12 +121,12 @@
     .banner{
       position:relative;
       height:160px;
-      background-image: var(--banner-gradient), var(--banner-photo, none);
-      background-size: cover, cover;
-      background-position: center, center;
-      background-repeat: no-repeat, no-repeat;
+      background-image: var(--banner-gradient);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       isolation:isolate;
-      border:1px solid var(--border-dark-contrast);
+      border:1px solid #000000;
     }
     .banner::before{
       content:"";
@@ -146,11 +146,14 @@
       opacity:.6;
       pointer-events:none;
     }
+    .banner[data-has-image="true"]{
+      background-image: var(--banner-photo);
+    }
     .banner[data-has-image="true"]::before{
       opacity:1;
     }
     .banner[data-has-image="true"]::after{
-      opacity:.35;
+      content:none;
     }
     #bannerToast{
       position:absolute;
@@ -242,6 +245,19 @@
     .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
     .profile-info{ flex:1; min-width:220px; display:flex; flex-direction:column; gap:12px; }
     .profile-name{ font-size:26px; font-weight:800; }
+    .profile-name--chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 14px;
+      border-radius:999px;
+      border:1px solid #000000;
+      background:#ffffff;
+      color:#000000;
+      font-weight:800;
+      width:fit-content;
+      max-width:100%;
+    }
     .pill{
       display:inline-flex;
       align-items:center;
@@ -254,7 +270,6 @@
       border:1px solid rgba(139,92,246,0.32);
       box-shadow:0 2px 6px rgba(15,23,42,0.08);
     }
-    .profile-name.pill{ letter-spacing:0.2px; }
     .profile-subtitle{ margin:0; color: var(--text-subtle); font-size:15px; }
     .profile-badges{ list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:12px; }
     .profile-badges li{ display:flex; align-items:center; gap:6px; }
@@ -397,6 +412,12 @@
     .dark-mode .btn-primary{ color:#111; }
     .dark-mode .empty-state{ background:rgba(29,33,37,0.8); border-color:var(--border-dark); }
     .dark-mode .banner{ border-color:var(--border-dark-contrast); }
+    .dark-mode .profile-name--chip{
+      border-color:#ffffff;
+      background:var(--card-dark);
+      color:#ffffff;
+      box-shadow:0 4px 14px rgba(0,0,0,0.35);
+    }
     .dark-mode .banner-btn{
       top:16px;
       bottom:auto;
@@ -435,7 +456,7 @@
             <span id="profileAvatarInitial">?</span>
           </div>
           <div class="profile-info">
-            <div class="profile-name pill" id="profileNameDisplay">Visitante</div>
+            <div class="profile-name profile-name--chip" id="profileNameDisplay">Visitante</div>
             <p class="profile-subtitle" id="profileSubtitle">Personalize sua jornada de aprendizado.</p>
             <ul class="profile-badges" aria-label="Resumo rápido do perfil">
               <li class="pill">
