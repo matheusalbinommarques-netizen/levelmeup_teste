@@ -1,8 +1,8 @@
 // sw.js
-// SW v1.0.10 — precache do shell + stale-while-revalidate para assets (mesmo-origin)
+// SW v1.0.11 — precache do shell + stale-while-revalidate para assets (mesmo-origin)
 
 const CACHE_PREFIX = 'lmu-cache';
-const VERSION = 'v1.0.10';
+const VERSION = 'v1.0.11';
 const PRECACHE = `${CACHE_PREFIX}-precache-${VERSION}`;
 const RUNTIME  = `${CACHE_PREFIX}-runtime-${VERSION}`;
 
