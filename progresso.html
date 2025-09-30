@@ -410,12 +410,9 @@
     }
 
     body:not(.dark-mode) .card{
-      border:2px solid #000000;
+      border:2px solid #000;
     }
 
-    body:not(.dark-mode) .subjects-grid article.subject-tile{
-      border:2px solid #000000;
-    }
     h3#quests-h,
     h3#mastery-h,
     h3#badges-h{
@@ -428,13 +425,13 @@
       border-radius:var(--radius);
     }
 
-    body:not(.dark-mode) .subjects-grid article.subject-tile{
-      border:1px solid var(--border);
-    }
-
     body.dark-mode .subject-tile{
       border-color:var(--border-dark-contrast);
       background:var(--card-dark);
+    }
+
+    body:not(.dark-mode) .subjects-grid article.subject-tile{
+      border:2px solid #000;
     }
   </style>
 </head>
