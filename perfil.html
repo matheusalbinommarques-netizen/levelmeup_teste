@@ -201,8 +201,10 @@
     }
     .banner-btn{
       position:absolute;
+      bottom:16px;
       right:16px;
-      top:16px;
+      top:auto;
+      left:auto;
       border:1px solid rgba(11,48,66,0.28);
       background:linear-gradient(135deg, rgba(255,255,255,0.97), rgba(221,232,255,0.9));
       color:#0b2533;
@@ -243,21 +245,8 @@
       overflow:hidden;
     }
     .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
-    .profile-info{ flex:1; min-width:220px; display:flex; flex-direction:column; gap:12px; }
-    .profile-name{ font-size:26px; font-weight:800; }
-    .profile-name--chip{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:6px 14px;
-      border-radius:999px;
-      border:1px solid #000000;
-      background:#ffffff;
-      color:#000000;
-      font-weight:800;
-      width:fit-content;
-      max-width:100%;
-    }
+    .profile-info{ flex:1; min-width:220px; display:flex; flex-direction:column; gap:8px; }
+    .profile-name{ font-size:26px; font-weight:800; color: var(--text); }
     .pill{
       display:inline-flex;
       align-items:center;
@@ -399,6 +388,7 @@
     .dark-mode .theme-toggle,
     .dark-mode .stats-list li{ background:var(--card-dark); border:1px solid var(--border-dark-contrast); box-shadow: var(--shadow-dark); }
     .dark-mode .pill{ background:rgba(139,92,246,0.22); color:#f4ebff; border-color:rgba(139,92,246,0.5); box-shadow:0 4px 14px rgba(0,0,0,0.35); }
+    .dark-mode .profile-name{ color: var(--text-dark); }
     .dark-mode .profile-subtitle,
     .dark-mode .activity-note,
     .dark-mode .activity-meta,
@@ -412,15 +402,11 @@
     .dark-mode .btn-primary{ color:#111; }
     .dark-mode .empty-state{ background:rgba(29,33,37,0.8); border-color:var(--border-dark); }
     .dark-mode .banner{ border-color:var(--border-dark-contrast); }
-    .dark-mode .profile-name--chip{
-      border-color:#ffffff;
-      background:var(--card-dark);
-      color:#ffffff;
-      box-shadow:0 4px 14px rgba(0,0,0,0.35);
-    }
     .dark-mode .banner-btn{
-      top:16px;
-      bottom:auto;
+      bottom:16px;
+      right:16px;
+      top:auto;
+      left:auto;
       border-color:rgba(255,255,255,0.24);
       background:rgba(20,26,32,0.68);
       color:var(--text-dark);
@@ -456,8 +442,7 @@
             <span id="profileAvatarInitial">?</span>
           </div>
           <div class="profile-info">
-            <div class="profile-name profile-name--chip" id="profileNameDisplay">Visitante</div>
-            <p class="profile-subtitle" id="profileSubtitle">Personalize sua jornada de aprendizado.</p>
+            <div class="profile-name" id="profileNameDisplay">Visitante</div>
             <ul class="profile-badges" aria-label="Resumo rápido do perfil">
               <li class="pill">
                 <span class="badge-label">Nível</span>
@@ -777,12 +762,6 @@
 
       const nameDisplay = $('#profileNameDisplay');
       if (nameDisplay) nameDisplay.textContent = name;
-
-      const subtitle = $('#profileSubtitle');
-      if (subtitle) {
-        const last = events.slice().sort((a, b) => new Date(b.ts || 0) - new Date(a.ts || 0))[0];
-        subtitle.textContent = last ? `Última atividade: ${formatRelative(last.ts || last.time)}` : 'Ainda não registrou nenhuma atividade. Comece registrando XP!';
-      }
 
       const avatarBox = $('#profileAvatar');
       if (avatarBox) {
