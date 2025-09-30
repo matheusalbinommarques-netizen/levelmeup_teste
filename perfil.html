@@ -590,6 +590,12 @@
   </style>
 </head>
 <body>
+  <script nonce="lmup-2025">
+    if (!window.__LMU_PARTIAL__) {
+      sessionStorage.setItem('lmu_goto','perfil.html'); // diga ao shell o alvo
+      location.href = 'index.html';                     // volta para o shell SPA
+    }
+  </script>
   <a class="skip-link" href="#conteudo">Ir para o conteúdo principal</a>
   <main id="conteudo">
     <div class="wrap">
