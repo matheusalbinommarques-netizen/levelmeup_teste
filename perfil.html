@@ -463,6 +463,44 @@
         top: calc(140px + 8px);
       }
     }
+
+    /* container das ações no herói */
+    .hero-actions{
+      position: absolute;
+      right: 16px;
+      bottom: 16px;            /* encosta no fundo do card */
+      display: flex;
+      flex-direction: column;  /* empilha */
+      gap: 8px;
+      z-index: 3;
+    }
+    /* estilo dos dois botões novos (mesma “carinha” do Editar banner) */
+    .hero-btn{
+      border:1px solid rgba(11,48,66,0.28);
+      background:linear-gradient(135deg, rgba(255,255,255,0.97), rgba(221,232,255,0.9));
+      color:#0b2533;
+      padding:6px 14px;
+      border-radius:999px;
+      backdrop-filter: blur(8px);
+      font-weight:600;
+      text-shadow:0 1px 2px rgba(255,255,255,.65);
+      box-shadow:0 6px 16px rgba(15,23,42,.15);
+    }
+    .hero-btn:hover,.hero-btn:focus-visible{
+      background:linear-gradient(135deg, #fff, rgba(214,227,255,.98));
+      box-shadow:0 10px 22px rgba(15,23,42,.22);
+    }
+    /* quando o botão do banner estiver DENTRO do grupo, não é absoluto */
+    .hero-actions .banner-btn{
+      position: static !important;
+      top: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+    }
+    /* ajuste fino em telas pequenas (opcional) */
+    @media (max-width: 560px){
+      .hero-actions{ right:12px; bottom:12px; }
+    }
   </style>
 </head>
 <body>
@@ -474,7 +512,12 @@
           <input id="bannerFileInput" class="sr-only" type="file" accept="image/png, image/jpeg, image/webp">
           <div id="bannerToast" role="status" aria-live="polite"></div>
         </div>
-        <button id="bannerEditBtn" class="btn banner-btn" type="button">Editar banner</button>
+        <div class="hero-actions" role="group" aria-label="Ações rápidas do perfil">
+          <button id="quickNameBtn" class="btn hero-btn" type="button" aria-controls="profileNameInput">Alterar nome</button>
+          <button id="quickAvatarBtn" class="btn hero-btn" type="button" aria-controls="profileAvatarInput">Alterar avatar</button>
+
+          <button id="bannerEditBtn" class="btn banner-btn" type="button">Editar banner</button>
+        </div>
         <div class="profile-core">
           <div class="avatar" id="profileAvatar" aria-hidden="true">
             <span id="profileAvatarInitial">?</span>
@@ -1047,6 +1090,28 @@
           window.dispatchEvent(new Event('lmu:theme-changed'));
         });
         themeBtn.__lmu_bound = true;
+      }
+
+      // Botão "Alterar nome": rola e foca o campo do formulário existente
+      const quickName = $('#quickNameBtn');
+      if (quickName && !quickName.__lmu_bound) {
+        quickName.addEventListener('click', () => {
+          const input = $('#profileNameInput');
+          input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          input?.focus();
+        });
+        quickName.__lmu_bound = true;
+      }
+
+      // Botão "Alterar avatar": rola e foca o campo do formulário existente
+      const quickAvatar = $('#quickAvatarBtn');
+      if (quickAvatar && !quickAvatar.__lmu_bound) {
+        quickAvatar.addEventListener('click', () => {
+          const input = $('#profileAvatarInput');
+          input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          input?.focus();
+        });
+        quickAvatar.__lmu_bound = true;
       }
 
       const bannerInput = $('#bannerFileInput');
