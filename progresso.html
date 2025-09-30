@@ -444,11 +444,6 @@
           <div class="profile-name"><span id="profileName">Visitante</span></div>
           <span class="tag" id="quickStats"><i class="fa-regular fa-star" aria-hidden="true"></i> <span id="statLevel">Nível 1</span></span>
         </div>
-        <div class="profile-actions">
-          <label class="btn" for="avatarInput" role="button" tabindex="0"><i class="fa-regular fa-image" aria-hidden="true"></i> Editar avatar</label>
-          <input id="avatarInput" type="file" accept="image/*" hidden>
-          <button class="btn" id="editNameBtn" type="button" aria-haspopup="dialog"><i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>Editar nome</button>
-        </div>
       </div>
     </section>
 
@@ -557,20 +552,6 @@
     </form>
   </dialog>
 
-  <!-- Dialog: editar nome -->
-  <dialog id="nameDialog" aria-labelledby="nameTitle">
-    <h3 id="nameTitle">Editar nome</h3>
-    <form id="nameForm" method="dialog">
-      <label>Nome
-        <input id="nameInput" class="input" maxlength="40" placeholder="Seu nome">
-      </label>
-      <menu class="menu">
-        <button class="btn-primary" type="submit">Salvar</button>
-        <button class="btn" type="button" id="nameCancel">Cancelar</button>
-      </menu>
-    </form>
-  </dialog>
-
   <!-- aria-live local (MPA); no SPA a home já tem um -->
   <div id="pageLive" class="sr-only" aria-live="polite"></div>
 
@@ -631,32 +612,6 @@
         const box = $('#avatarBox'); if (box) { box.innerHTML=''; box.appendChild(imgEl); }
       }
     }
-    $('#avatarInput')?.addEventListener('change', async (e)=>{
-      const f = e.target.files?.[0]; if(!f) return;
-      const data = await f.arrayBuffer();
-      const blob = new Blob([data], {type: f.type || 'image/*'});
-      const reader = new FileReader();
-      reader.onload = () => { safeSet(K_AVATAR, reader.result); renderProfile(); announce('Avatar atualizado.'); };
-      reader.readAsDataURL(blob);
-    });
-    $('#editNameBtn')?.addEventListener('click', ()=>{
-      const dlg = $('#nameDialog'); if (!dlg) return;
-      const input = $('#nameInput'); if (input) input.value = safeGet(K_NAME,'Visitante');
-      dlg.showModal ? dlg.showModal() : dlg.setAttribute('open','');
-      input?.focus();
-    });
-    $('#nameCancel')?.addEventListener('click', ()=>{ const dlg=$('#nameDialog'); dlg?.close?.(); dlg?.removeAttribute('open'); });
-    $('#nameForm')?.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const input = $('#nameInput');
-      const v = (input?.value||'Visitante').trim()||'Visitante';
-      safeSet(K_NAME, v); renderProfile();
-      const dlg = $('#nameDialog'); dlg?.close?.(); dlg?.removeAttribute('open');
-      announce('Nome atualizado.');
-      window.dispatchEvent(new Event('lmu:name-changed'));
-      window.refreshNameOnTopbar?.();
-    });
-
     /* ==== MATÉRIAS EM ANDAMENTO ==== */
     function subjectsFromData(){
       const evs = loadEvents();
