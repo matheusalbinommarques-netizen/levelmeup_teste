@@ -200,9 +200,6 @@
       border-color:rgba(248,113,113,0.6);
     }
     .banner-btn{
-      position:absolute;
-      top:16px;
-      right:16px;
       border:1px solid rgba(11,48,66,0.28);
       background:linear-gradient(135deg, rgba(255,255,255,0.97), rgba(221,232,255,0.9));
       color:#0b2533;
@@ -539,64 +536,48 @@
       text-shadow:none;
       box-shadow:0 10px 24px rgba(0,0,0,.35);
     }
-    /* === Layout atualizado para ações rápidas do perfil === */
-    .profile-core{
-      display:flex;
-      align-items:center;
-      gap:16px;
-      padding:0 24px 24px;
-      margin-top:0;
-      flex-wrap:wrap;
+
+    /* Linha do perfil centralizada e fluida */
+    .profile-core {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px 24px;
+      margin-top: 0;
+      flex-wrap: wrap;
     }
 
-    .profile-core .avatar{
-      flex:0 0 auto;
+    /* Botões ao lado do nome (participam do fluxo) */
+    .profile-core .hero-actions {
+      position: static;
+      margin-left: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    .profile-core .profile-info{
-      flex:1 1 320px;
-      min-width:0;
+    /* Quando o banner button estiver no grupo, não é absoluto */
+    .hero-actions #bannerEditBtn {
+      position: static !important;
+      inset: auto !important;
     }
 
-    .profile-core .hero-actions{
-      position:static;
-      margin-left:auto;
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      gap:10px;
-    }
-
-    .hero-actions #bannerEditBtn{
-      position:static !important;
-    }
-
-    .hero-btn{
-      width:168px;
-    }
-
-    @media (max-width: 980px){
-      .profile-core{
-        padding:0 16px 20px;
-      }
-    }
-
-    @media (max-width: 720px){
-      .profile-core{
-        flex-direction:column;
-        align-items:flex-start;
-        gap:16px;
-        padding:0 16px 24px;
+    /* (Já existente) Nome + badges alinham por baseline em telas maiores */
+    @media (min-width: 720px) {
+      .profile-info {
+        flex-direction: row;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 6px 12px;
       }
 
-      .profile-core .hero-actions{
-        width:100%;
-        margin-left:0;
-        align-items:stretch;
+      .profile-name {
+        margin-right: 8px;
       }
 
-      .profile-core .hero-actions .hero-btn{
-        width:100%;
+      .profile-badges {
+        margin-left: 0;
+        justify-content: flex-start;
       }
     }
   </style>
